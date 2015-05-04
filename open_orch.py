@@ -25,8 +25,8 @@ if not os.path.exists(tmp_dir):
 	os.makedirs(tmp_dir)
 if not os.path.exists(dwnld_dir):
 	os.makedirs(dwnld_dir)
-if not os.path.exists(out_dir):
-	os.makedirs(out_dir)
+#if not os.path.exists(out_dir):
+#	os.makedirs(out_dir)
 
 for grp in instru_group : 
   if grp in oodict:
