@@ -1,7 +1,7 @@
 { 
  "input url" : "http://theremin.music.uiowa.edu/sound%20files/MIS%20Pitches%20-%202014/",
- "temp directory" : "./uiowa_tmp/",
- "download directory" : "./uiowa_tmp/dwnld/",
+ "temp directory" : "uiowa_tmp/",
+ "download directory" : "uiowa_tmp/dwnld/",
  "output directory" : "UIowa_edu_sfz",
  "brass" : [
 	{ "name" : "french_horn", "url" :  "/Brass/Horn/Horn.ff.stereo.zip"} ,
