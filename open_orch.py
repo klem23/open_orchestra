@@ -31,10 +31,6 @@ if not os.path.exists(out_dir):
 for grp in instru_group : 
   if grp in oodict:
     for instru in oodict[grp] :
-      #Create output dir for unzipped sample
-      xtract_dir = tmp_dir + "/" + grp + "/" + instru["name"] + "/"
-      if not os.path.exists(xtract_dir):
-        os.makedirs(xtract_dir)
 
       #zip destination file
       dst_file = dwnld_dir + string.replace(os.path.basename(instru["url"]), "%20", "_")
@@ -44,14 +40,20 @@ for grp in instru_group :
 	print "Downloading " + oodict["input url"] + instru["url"]
         urllib.urlretrieve (oodict["input url"] + instru["url"], dst_file)
 
+      #Create output dir for unzipped sample
+      xtract_dir = tmp_dir + "/xtract/" + grp + "/" + instru["name"] + "/"
+      if not os.path.exists(xtract_dir):
+        os.makedirs(xtract_dir)
+
       #Extract
-      print "Extract " + dst_file
-      file_zip = zipfile.ZipFile(dst_file, "r")
-      file_zip.extractall(xtract_dir)
-      file_zip.close()
+      if not os.listdir(xtract_dir):
+        print "Extract " + dst_file
+        file_zip = zipfile.ZipFile(dst_file, "r")
+        file_zip.extractall(xtract_dir)
+        file_zip.close()
 
       #Create output dir for transcoded sample
-      wav_sample_dir = out_dir + "/" + grp + "/" + instru["name"] + "/"
+      wav_sample_dir = tmp_dir + "/transcode/" + grp + "/" + instru["name"] + "/"
       if not os.path.exists(wav_sample_dir):
         os.makedirs(wav_sample_dir)
 
@@ -63,7 +65,7 @@ for grp in instru_group :
         outfile = wav_sample_dir + os.path.splitext(infile)[0] + ".wav"
         try:
 	  cmd = ["sox", xtract_dir + infile, outfile]
-	  print "command :" + str(cmd)
+	  #print "command :" + str(cmd)
           subprocess.call(cmd)
         except OSError as e:
 	  print "SOX programm for converting audio files has encounter a problem : " 
