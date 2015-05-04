@@ -8,7 +8,7 @@ import zipfile
 import urllib
 import json
 
-igroup = ["brass", "wood", "string", "perc"]
+instru_group = ["brass", "wood", "string", "perc"]
 
 print "Using orchestra " + str(sys.argv[1])
 
@@ -28,7 +28,7 @@ if not os.path.exists(dwnld_dir):
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)
 
-for grp in igroup : 
+for grp in instru_group : 
   if grp in oodict:
     for instru in oodict[grp] :
       #Create output dir for unzipped sample
@@ -80,7 +80,6 @@ for grp in igroup :
 	  #wave_header -> new size
 	  #copy file without zero
     
-          #audio_file.close()
 
     #SFZ file writing
       sfz_file_name = out_dir + "/grp/" + instru["name"] + ".sfz"
