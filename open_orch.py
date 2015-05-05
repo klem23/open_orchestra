@@ -7,9 +7,23 @@ import string
 import zipfile
 import urllib
 import json
+import struct
 
 def Blank_Width():
   return 4
+
+wave_header_fmt = "III"
+fmt_header_fmt = "IIHHIIHH"
+data_header_fmt = "II"
+
+def Wave_Header_Size():
+  return 12
+
+def Fmt_Header_Size():
+  return 24
+
+def Data_Header_Size():
+  return 8
 
 instru_group = ["brass", "wood", "string", "perc"]
 
@@ -78,23 +92,48 @@ for grp in instru_group :
 
 
       #Blank remover
+        print "Blank remover " + outfile
         try:
-          with open(outfile) as audio_file: 
-	    begin = audio_file.read(4)
-            if not "RIFF" in begin:
-              print "Problem : file is not a wav"
-              continue
+          with open(outfile, 'rb') as audio_file: 
+
+	    wh = audio_file.read(Wave_Header_Size())
+            whd = struct.unpack(wave_header_fmt, wh)
+
+            #print whd[0] 
+
+            fh = audio_file.read(Fmt_Header_Size())
+            fhd = struct.unpack(fmt_header_fmt, fh)
+
+            #audio format
+            print fhd[2]
+            #channels
+            print fhd[3]
+            #srate
+            print fhd[4]
+
+            dh = audio_file.read(Data_Header_Size())
+            dhd = struct.unpack(data_header_fmt, dh)
+
+
           #audio_file.lseek(WAVE_HEADER)
-	  
-	    data = audio_file.read(Blank_Width())
-            while not '' in data:
-	      data = audio_file.read(Blank_Width())
-	      if not 0 in data[0]:
+	    audio_file.seek(44)
+	    data = audio_file.read(1)
+            idx = 0;
+            while data:
+	      if data != 0:
+		found = False
                 #if not 0 in data[1] and not 0 in data[2] and not 0 in data[3] and not 0 in data[4]:
-		for i in Blank_Width:
-                  if not 0 in data[i]:
-                   print "youpi"
-                   continue
+		for i in range(0, Blank_Width() - 2):
+	    	  data = audio_file.read(1)
+                  if data == 0:
+                   print "youpi" + str(i)
+                   found = True
+                if not found:
+                  print "stop " + str(idx)
+                  break
+	      #data = audio_file.read(Blank_Width())
+              idx += Blank_Width()
+            print idx
 	  #pos = audio_file.lseek(0)
 	  #wave_header -> new size
 	  #copy file without zero
