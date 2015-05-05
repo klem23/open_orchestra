@@ -8,6 +8,9 @@ import zipfile
 import urllib
 import json
 
+def Blank_Width():
+  return 4
+
 instru_group = ["brass", "wood", "string", "perc"]
 
 print "Using orchestra " + str(sys.argv[1])
@@ -61,7 +64,7 @@ for grp in instru_group :
       for infile in os.listdir(xtract_dir):
         print "transcoding : " + infile
 	if (infile==".") or (infile=="..") :
-	  break
+	  continue
         outfile = wav_sample_dir + os.path.splitext(infile)[0] + ".wav"
         try:
 	  cmd = ["sox", xtract_dir + infile, outfile]
@@ -72,25 +75,34 @@ for grp in instru_group :
 	  print "ERRNO " + str(e.errno) + " : " + e.strerror
 	  exit()
 
+
+
       #Blank remover
-        #with open(outfile) as audio_file: 
+        try:
+          with open(outfile) as audio_file: 
+	    begin = audio_file.read(4)
+            if not "RIFF" in begin:
+              print "Problem : file is not a wav"
+              continue
           #audio_file.lseek(WAVE_HEADER)
 	  
-	  #data = audio_file.fread(5)
-	  #if data[4] == 0 && data[3]==0 etc
+	    data = audio_file.read(Blank_Width())
+            while not '' in data:
+	      data = audio_file.read(Blank_Width())
+	      if not 0 in data[0]:
+                #if not 0 in data[1] and not 0 in data[2] and not 0 in data[3] and not 0 in data[4]:
+		for i in Blank_Width:
+                  if not 0 in data[i]:
+                   print "youpi"
+                   continue
 	  #pos = audio_file.lseek(0)
 	  #wave_header -> new size
 	  #copy file without zero
-    
+        except IOError :
+          print "Error opening file, next"
+          continue
 
     #SFZ file writing
       sfz_file_name = out_dir + "/grp/" + instru["name"] + ".sfz"
       #with open(sfz_file_name) as sfz_file: 
 	
-
-
-
-
-
-  #Clean at end
-  data_file.close()
