@@ -165,6 +165,7 @@ for grp in instru_group :
 
     #SFZ file writing
       sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + ".sfz"
+      print "Create SFZ file : " + sfz_file_name
       with open(sfz_file_name, 'w') as sfz_file: 
         sfz_file.write("// ----------------------\n")
         sfz_file.write("//  Open Orchestra\n")
@@ -182,9 +183,7 @@ for grp in instru_group :
           sfz_file.write("<region>\n")
           sfz_file.write("sample=" + grp + "/" + instru["name"] + "/" + audiofile + "\n")
           elem = string.split(audiofile, oodict["splitter"])
-          print elem
           for tag in elem:
-            print "tag :" + tag
 	    if re.match("[A-G][0-9]", tag):
               note = tag
               sfz_file.write("lokey=" + note + "\n")
