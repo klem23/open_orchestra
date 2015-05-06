@@ -92,6 +92,13 @@ for grp in instru_group :
 
 
       #Blank remover
+        #Create output dir for unblanked sample
+        sfz_sample_dir = out_dir + "/" + grp + "/" + instru["name"] + "/"
+        if not os.path.exists(sfz_sample_dir):
+          os.makedirs(sfz_sample_dir)
+
+
+
         print "Blank remover " + outfile
         try:
           with open(outfile, 'rb') as audio_file: 
@@ -134,12 +141,26 @@ for grp in instru_group :
 	      #data = audio_file.read(Blank_Width())
               idx += Blank_Width()
             print idx
+
+
+          #Prepare for copying
+            blank_out_file =  sfz_sample_dir + os.path.splitext(infile)[0] + ".wav"
+            audio_file.seek(0)
+            with open(blank_out_file, 'wb') as bo_file: 
+              bo_file.write(audio_file.read(4))
+          #WAVE HEADER 
+          #copy RIFF
+          #change & write size - idx
+          #copy WAVE
+
+            
 	  #pos = audio_file.lseek(0)
 	  #wave_header -> new size
 	  #copy file without zero
         except IOError :
           print "Error opening file, next"
           continue
+
 
     #SFZ file writing
       sfz_file_name = out_dir + "/grp/" + instru["name"] + ".sfz"
