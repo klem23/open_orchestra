@@ -186,7 +186,6 @@ for grp in instru_group :
           for tag in elem:
             print "tag :" + tag
 	    if re.match("[A-G][0-9]", tag):
-              print "fuck"
               note = tag
               sfz_file.write("lokey=" + note + "\n")
               sfz_file.write("hikey=" + note + "\n")
