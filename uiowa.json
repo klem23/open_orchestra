@@ -1,8 +1,10 @@
 { 
+ "orchestra name" : "University Iowa MIS",
  "input url" : "http://theremin.music.uiowa.edu/sound%20files/MIS%20Pitches%20-%202014/",
  "temp directory" : "uiowa_tmp/",
  "download directory" : "uiowa_tmp/dwnld/",
  "output directory" : "UIowa_edu_sfz",
+ "splitter" : ".",
  "brass" : [
 	{ "name" : "french_horn", "url" :  "/Brass/Horn/Horn.ff.stereo.zip"} ,
 	{ "name" : "trumpet_vib", "url" : "/Brass/BbTrumpet/Trumpet.vib.ff.stereo.zip" },

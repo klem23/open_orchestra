@@ -8,6 +8,7 @@ import zipfile
 import urllib
 import json
 import struct
+import re
 
 def Blank_Width():
   return 4
@@ -163,6 +164,34 @@ for grp in instru_group :
 
 
     #SFZ file writing
-      sfz_file_name = out_dir + "/grp/" + instru["name"] + ".sfz"
-      #with open(sfz_file_name) as sfz_file: 
+      sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + ".sfz"
+      with open(sfz_file_name, 'w') as sfz_file: 
+        sfz_file.write("// ----------------------\n")
+        sfz_file.write("//  Open Orchestra\n")
+        sfz_file.write("// ----------------------\n")
+        sfz_file.write("//  " + oodict["orchestra name"] + "\n")
+        sfz_file.write("// ---------------------- \n")
+        sfz_file.write("//  " +instru["name"] + "\n")
+        sfz_file.write("// ---------------------- \n\n\n\n")
+
+
+        sfz_file.write("<group>\n")
+        sfz_file.write("\n")
 	
+        for audiofile in os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/"):	
+          sfz_file.write("<region>\n")
+          sfz_file.write("sample=" + grp + "/" + instru["name"] + "/" + audiofile + "\n")
+          elem = string.split(audiofile, oodict["splitter"])
+          print elem
+          for tag in elem:
+            print "tag :" + tag
+	    if re.match("[A-G][0-9]", tag):
+              print "fuck"
+              note = tag
+              sfz_file.write("lokey=" + note + "\n")
+              sfz_file.write("hikey=" + note + "\n")
+              sfz_file.write("pitch_keycenter=" + note +"\n")
+              break
+
+          sfz_file.write("\n")
+
