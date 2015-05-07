@@ -20,7 +20,8 @@ def sample_list_key(filename):
     if re.match("[A-G][0-9]", tag):
       char_key = list(tag)
       key = char_key[1] + char_key[0] + "d"
-    if re.match("[A-G]b[0-9]", tag):
+    if re.match("[A-G][b-s][0-9]", tag):
+      char_key = list(tag)
       key = char_key[2] + char_key[0] + char_key[1]
 
   return key
@@ -204,7 +205,7 @@ for grp in instru_group :
           sfz_file.write("sample=" + grp + "/" + instru["name"] + "/" + audiofile + "\n")
           elem = string.split(audiofile, oodict["splitter"])
           for tag in elem:
-	    if re.match("[A-G][0-9]", tag) or re.match("[A-G]b[0-9]", tag) :
+	    if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
               note = tag
               sfz_file.write("lokey=" + note + "\n")
               sfz_file.write("hikey=" + note + "\n")
