@@ -167,14 +167,24 @@ for grp in instru_group :
             blank_out_file =  sfz_sample_dir + os.path.splitext(infile)[0] + ".wav"
             audio_file.seek(0)
             with open(blank_out_file, 'wb') as bo_file: 
+              #WAVE HEADER 
               bo_file.write(audio_file.read(4))
-          #WAVE HEADER 
+              bo_file.write(str(struct.unpack("I", audio_file.read(4))[0] - idx))
+              bo_file.write(audio_file.read(4))
           #copy RIFF
           #change & write size - idx
           #copy WAVE
+              #FMT header
+              bo_file.write(audio_file.read(4))
+  
+          
+              #DATA 
+              bo_file.write(audio_file.read(4))
+              bo_file.write(str(struct.unpack("I", audio_file.read(4))[0] - idx))
+              audio_file.seek(idx, 1)
+              bo_file.write(audio_file.read())
 
-            
-	  #pos = audio_file.lseek(0)
+
 	  #wave_header -> new size
 	  #copy file without zero
         except IOError :
