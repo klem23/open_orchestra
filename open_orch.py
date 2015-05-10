@@ -137,8 +137,18 @@ for grp in instru_group :
             print fhd[3]
             #srate
             print fhd[4]
-            #it/sample
+            #bidepth
             print fhd[7]
+            if fhd[7] == 8:
+              smpl_fmt = "B"
+              smpl_size = 1
+            elif fhd[7] == 16:
+              print "yopypi"
+              smpl_fmt = "H"
+              smpl_size = 2 
+            if fhd[7] == 24:
+              smpl_fmt = "BBB"
+              smpl_size = 3
 
             dh = audio_file.read(Data_Header_Size())
             dhd = struct.unpack(data_header_fmt, dh)
@@ -146,15 +156,15 @@ for grp in instru_group :
 
           #audio_file.lseek(WAVE_HEADER)
 	    #audio_file.seek(44)
-	    data = audio_file.read(1)
+	    data = audio_file.read(smpl_size)
             idx = 0;
             while data:
-	      val = struct.unpack("B", data)[0]
+	      val = struct.unpack(smpl_fmt, data)[0]
 	      if val != 0:
 		found = False
                 #if not 0 in data[1] and not 0 in data[2] and not 0 in data[3] and not 0 in data[4]:
 		for i in range(0, Blank_Width() - 1):
-	          val = struct.unpack("B", audio_file.read(1))[0]
+	          val = struct.unpack(smpl_fmt, audio_file.read(smpl_size))[0]
                   if val == 0:
                    found = True
                    break
@@ -162,11 +172,11 @@ for grp in instru_group :
                   print "stop :" + str(idx)
                   break
                 else:
-                  idx += Blank_Width()
+                  idx += smpl_size * Blank_Width()
           
 	      #data = audio_file.read(Blank_Width())
-	      data = audio_file.read(1)
-              idx += 1
+	      data = audio_file.read(smpl_size)
+              idx += smpl_size
             print "final idx :" + str(idx)
 
 
