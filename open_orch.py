@@ -11,7 +11,7 @@ import struct
 import re
 
 def Blank_Width():
-  return 4
+  return 20
 
 #function to sort sample list
 def sample_list_key(filename):
@@ -143,24 +143,29 @@ for grp in instru_group :
 
 
           #audio_file.lseek(WAVE_HEADER)
-	    audio_file.seek(44)
+	    #audio_file.seek(44)
 	    data = audio_file.read(1)
             idx = 0;
             while data:
-	      if data != 0:
+	      val = struct.unpack("B", data)[0]
+	      if val != 0:
 		found = False
                 #if not 0 in data[1] and not 0 in data[2] and not 0 in data[3] and not 0 in data[4]:
-		for i in range(0, Blank_Width() - 2):
-	    	  data = audio_file.read(1)
-                  if data == 0:
-                   print "youpi" + str(i)
+		for i in range(0, Blank_Width() - 1):
+	          val = struct.unpack("B", audio_file.read(1))[0]
+                  if val == 0:
                    found = True
+                   break
                 if not found:
-                  print "stop " + str(idx)
+                  print "stop :" + str(idx)
                   break
+                else:
+                  idx += Blank_Width()
+          
 	      #data = audio_file.read(Blank_Width())
-              idx += Blank_Width()
-            print idx
+	      data = audio_file.read(1)
+              idx += 1
+            print "final idx :" + str(idx)
 
 
           #Prepare for copying
@@ -169,18 +174,18 @@ for grp in instru_group :
             with open(blank_out_file, 'wb') as bo_file: 
               #WAVE HEADER 
               bo_file.write(audio_file.read(4))
-              bo_file.write(str(struct.unpack("I", audio_file.read(4))[0] - idx))
+              bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
               bo_file.write(audio_file.read(4))
           #copy RIFF
           #change & write size - idx
           #copy WAVE
               #FMT header
-              bo_file.write(audio_file.read(4))
+              bo_file.write(audio_file.read(24))
   
           
               #DATA 
               bo_file.write(audio_file.read(4))
-              bo_file.write(str(struct.unpack("I", audio_file.read(4))[0] - idx))
+              bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
               audio_file.seek(idx, 1)
               bo_file.write(audio_file.read())
 
