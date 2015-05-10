@@ -137,6 +137,8 @@ for grp in instru_group :
             print fhd[3]
             #srate
             print fhd[4]
+            #it/sample
+            print fhd[7]
 
             dh = audio_file.read(Data_Header_Size())
             dhd = struct.unpack(data_header_fmt, dh)
