@@ -27,11 +27,6 @@ def sample_list_key(filename):
   return key
 
 
-##########
-#Main Code
-##########
-
-
 wave_header_fmt = "III"
 fmt_header_fmt = "IIHHIIHH"
 data_header_fmt = "II"
@@ -47,7 +42,17 @@ def Data_Header_Size():
 
 instru_group = ["brass", "wood", "string", "perc"]
 
+##########
+#Main Code
+##########
+
+
 print "Using orchestra " + str(sys.argv[1])
+
+
+############
+#Get samples
+############
 
 #open json dict for corresponding orchestra
 with open(str(sys.argv[1])) as data_file:    
@@ -89,6 +94,11 @@ for grp in instru_group :
         file_zip.extractall(xtract_dir)
         file_zip.close()
 
+
+###########
+#Transcode
+###########
+
       #Create output dir for transcoded sample
       wav_sample_dir = tmp_dir + "/transcode/" + grp + "/" + instru["name"] + "/"
       if not os.path.exists(wav_sample_dir):
@@ -110,8 +120,10 @@ for grp in instru_group :
 	  exit()
 
 
+###############
+#Blank remover
+###############
 
-      #Blank remover
         #Create output dir for unblanked sample
         sfz_sample_dir = out_dir + "/" + grp + "/" + instru["name"] + "/"
         if not os.path.exists(sfz_sample_dir):
@@ -208,8 +220,10 @@ for grp in instru_group :
           print "Error opening file, next"
           continue
 
+##################
+#SFZ file writing
+##################
 
-    #SFZ file writing
       sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + ".sfz"
       print "Create SFZ file : " + sfz_file_name
       with open(sfz_file_name, 'w') as sfz_file: 
