@@ -160,7 +160,6 @@ for grp in instru_group :
               smpl_fmt = "B"
               smpl_size = 1
             elif fmthd[5] == 16:
-              print "yopypi"
               smpl_fmt = "H"
               smpl_size = 2 
             elif fmthd[5] == 24:
