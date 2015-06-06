@@ -28,14 +28,14 @@ def sample_list_key(filename):
 
 
 wave_header_fmt = "III"
-fmt_header_fmt = "HHIIHH"
+fmt_header_fmt = "IIHHIIHH"
 data_header_fmt = "II"
 
 def Wave_Header_Size():
   return 12
 
 def Fmt_Header_Size():
-  return 8
+  return 24
 
 def Data_Header_Size():
   return 8
@@ -141,38 +141,37 @@ for grp in instru_group :
             #print whd[0] 
 
             fh = audio_file.read(Fmt_Header_Size())
-            fhd = struct.unpack("II", fh)
+            fhd = struct.unpack(fmt_header_fmt, fh)
 
             print fhd[1]
-	    fmth = audio_file.read(16)
-            fmthd = struct.unpack(fmt_header_fmt, fmth)
 
             #audio format
-            print "format " + str(fmthd[0])
+            print "format " + str(fhd[2])
             #channels
-            print "channels " + str(fmthd[1])
+            print "channels " + str(fhd[3])
             #srate
-            print "srate " + str(fmthd[2])
+            print "srate " + str(fhd[4])
             #bitdepth
-            print "bitdepth " + str(fmthd[5])
+            print "bitdepth " + str(fhd[7])
 
-            if fmthd[5] == 8:
+            if fhd[7] == 8:
               smpl_fmt = "B"
               smpl_size = 1
-            elif fmthd[5] == 16:
+            elif fhd[7] == 16:
               smpl_fmt = "H"
               smpl_size = 2 
-            elif fmthd[5] == 24:
+            elif fhd[7] == 24:
               smpl_fmt = "BBB"
               smpl_size = 3
 
-            fmth2 = audio_file.read(fhd[1] - 16)
+            audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
 
             #if data is not PCM => extended header
-            if fmthd[0] != 1:
+            if fhd[2] != 1:
               facth = audio_file.read(8)
               facthd = struct.unpack("II", facth)
               factdatah = audio_file.read(facthd[1])	
+              print facthd[1]
           
 
             dh = audio_file.read(Data_Header_Size())
@@ -218,13 +217,10 @@ for grp in instru_group :
           #copy WAVE
               #FMT header
               #bo_file.write(audio_file.read(24))
-              bo_file.write(audio_file.read(fhd[1] + 8))
+              bo_file.write(audio_file.read(8 + fhd[1]))
               #if data is not PCM => extended header
-              if fmthd[0] != 1:
-                facth = audio_file.read(8)
-                #facthd = struct.unpack("II", facth)
-                factdatah = audio_file.read(facthd[1])
-
+              if fhd[2] != 1:
+                bo_file.write(audio_file.read(8 + facthd[1]))
           
               #DATA 
               bo_file.write(audio_file.read(4))
