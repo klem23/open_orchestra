@@ -9,6 +9,7 @@ import urllib
 import json
 import struct
 import re
+import shutil
 
 def Blank_Width():
   return 20
@@ -64,11 +65,13 @@ with open(str(sys.argv[1])) as data_file:
 
 #check temp and dwlnd directory
 if not os.path.exists(tmp_dir):
-	os.makedirs(tmp_dir)
+  os.makedirs(tmp_dir)
 if not os.path.exists(dwnld_dir):
-	os.makedirs(dwnld_dir)
-#if not os.path.exists(out_dir):
-#	os.makedirs(out_dir)
+  os.makedirs(dwnld_dir)
+if not os.path.exists(out_dir):
+  os.makedirs(out_dir)
+
+shutil.copyfile("./" + oodict['license'], out_dir + "/License") 
 
 for grp in instru_group : 
   if grp in oodict:

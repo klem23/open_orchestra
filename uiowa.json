@@ -1,5 +1,6 @@
 { 
  "orchestra name" : "University Iowa MIS",
+ "license" : "LICENSE_uiowa",
  "input url" : "http://theremin.music.uiowa.edu/sound%20files/MIS%20Pitches%20-%202014/",
  "temp directory" : "uiowa_tmp/",
  "download directory" : "uiowa_tmp/dwnld/",
