@@ -12,7 +12,7 @@ import re
 import shutil
 
 def Blank_Width():
-  return 20
+  return 30
 
 #function to sort sample list
 def sample_list_key(filename):
