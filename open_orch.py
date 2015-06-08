@@ -28,6 +28,37 @@ def sample_list_key(filename):
   return key
 
 
+def phil_filter(filename):
+  elem = string.split(filename, "_")
+  if re.match("[0-9]*", elem[2]):
+    return true
+  else:
+    return false
+
+def phil_sorti_lgth(filename):
+  elem = string.split(filename, "_")
+  if elem[2] == "025":
+    return "very short"
+  elif elem[2] == "05":
+    return "short"
+  elif elem[2] == "1":
+    return "long"
+  elif elem[2] == "15":
+    return "very long"
+
+def phil_sort_level(filename):
+  elem = string.split(filename, "_")
+  if elem[3] == "pianissimo":
+    return "0-25"
+  elif elem[3] == "piano":
+    return "26-50"
+  elif elem[3] == "mezzo":
+    return "51-75"
+  elif elem[3] == "forte":
+    return "76-100"
+  elif elem[3] == "fortissimo":
+    return"101-127"
+
 wave_header_fmt = "III"
 fmt_header_fmt = "IIHHIIHH"
 data_header_fmt = "II"
