@@ -12,7 +12,7 @@ import re
 import shutil
 
 def Blank_Width():
-  return 30
+  return 20
 
 #function to sort sample list
 def sample_list_key(filename):
@@ -261,7 +261,7 @@ for grp in instru_group :
         sample_list.sort(key = sample_list_key)
         for audiofile in sample_list :	
           sfz_file.write("<region>\n")
-          sfz_file.write("sample=" + grp + "/" + instru["name"] + "/" + audiofile + "\n")
+          sfz_file.write("sample=" + instru["name"] + "/" + audiofile + "\n")
           elem = string.split(audiofile, oodict["splitter"])
           for tag in elem:
 	    if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
