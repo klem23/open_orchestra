@@ -30,21 +30,22 @@ def sample_list_key(filename):
 
 def phil_filter(filename):
   elem = string.split(filename, "_")
-  if re.match("[0-9]*", elem[2]):
-    return true
+  if re.match("[0-9]+", elem[2]):
+    return True
   else:
-    return false
+    return False
+lgth_grp = ["very_short", "short", "long", "very_long"]
 
-def phil_sorti_lgth(filename):
+def phil_sort_lgth(filename):
   elem = string.split(filename, "_")
   if elem[2] == "025":
-    return "very short"
+    return "/very_short/"
   elif elem[2] == "05":
-    return "short"
+    return "/short/"
   elif elem[2] == "1":
-    return "long"
+    return "/long/"
   elif elem[2] == "15":
-    return "very long"
+    return "/very_long/"
 
 def phil_sort_level(filename):
   elem = string.split(filename, "_")
@@ -141,6 +142,10 @@ for grp in instru_group :
       #Transcode
       for infile in os.listdir(xtract_dir):
         print "transcoding : " + infile
+        if oodict["key"] == "phil":
+          if not phil_filter(infile):
+            print "Jump file as it's not a note"
+            continue
 	if (infile==".") or (infile=="..") :
 	  continue
         outfile = wav_sample_dir + os.path.splitext(infile)[0] + ".wav"
@@ -239,7 +244,13 @@ for grp in instru_group :
 
 
           #Prepare for copying
-            blank_out_file =  sfz_sample_dir + os.path.splitext(infile)[0] + ".wav"
+            lgth = ""
+            if oodict["key"] == "phil":
+              lgth = phil_sort_lgth(infile)
+              if not os.path.exists(sfz_sample_dir + lgth):
+                os.makedirs(sfz_sample_dir + lgth)
+
+            blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(infile)[0] + ".wav"
             audio_file.seek(0)
             with open(blank_out_file, 'wb') as bo_file: 
               #WAVE HEADER 
@@ -266,41 +277,53 @@ for grp in instru_group :
 	  #wave_header -> new size
 	  #copy file without zero
         except IOError :
-          print "Error opening file, next"
+          print "Error opening file, next " + outfile
           continue
 
 ##################
 #SFZ file writing
 ##################
 
-      sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + ".sfz"
-      print "Create SFZ file : " + sfz_file_name
-      with open(sfz_file_name, 'w') as sfz_file: 
-        sfz_file.write("// ----------------------\n")
-        sfz_file.write("//  Open Orchestra\n")
-        sfz_file.write("// ----------------------\n")
-        sfz_file.write("//  " + oodict["orchestra name"] + "\n")
-        sfz_file.write("// ---------------------- \n")
-        sfz_file.write("//  " +instru["name"] + "\n")
-        sfz_file.write("// ---------------------- \n\n\n\n")
+      lgth_list = "_"
+      if oodict["key"] == "phil":
+        lgth_list = lgth_grp
+
+      for lgth_path in lgth_list:
+        if lgth_path == "_":
+          lgth_path = ""
+          sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + ".sfz"
+        else:
+          sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + "_" + lgth_path + ".sfz"
+        print "Create SFZ file : " + sfz_file_name
+        with open(sfz_file_name, 'w') as sfz_file: 
+          sfz_file.write("// ----------------------\n")
+          sfz_file.write("//  Open Orchestra\n")
+          sfz_file.write("// ----------------------\n")
+          sfz_file.write("//  " + oodict["orchestra name"] + "\n")
+          sfz_file.write("// ---------------------- \n")
+          sfz_file.write("//  " + instru["name"] + " " + lgth_path + "\n")
+          sfz_file.write("// ---------------------- \n\n\n\n")
 
 
-        sfz_file.write("<group>\n")
-        sfz_file.write("\n")
-	
-        sample_list = os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/")
-        sample_list.sort(key = sample_list_key)
-        for audiofile in sample_list :	
-          sfz_file.write("<region>\n")
-          sfz_file.write("sample=" + instru["name"] + "/" + audiofile + "\n")
-          elem = string.split(audiofile, oodict["splitter"])
-          for tag in elem:
-	    if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
-              note = tag
-              sfz_file.write("lokey=" + note + "\n")
-              sfz_file.write("hikey=" + note + "\n")
-              sfz_file.write("pitch_keycenter=" + note +"\n")
-              break
-
+          sfz_file.write("<group>\n")
           sfz_file.write("\n")
+
+	
+
+
+          sample_list = os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/" + lgth_path + "/")
+          sample_list.sort(key = sample_list_key)
+          for audiofile in sample_list :	
+            sfz_file.write("<region>\n")
+            sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + audiofile + "\n")
+            elem = string.split(audiofile, oodict["splitter"])
+            for tag in elem:
+	      if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
+                note = tag
+                sfz_file.write("lokey=" + note + "\n")
+                sfz_file.write("hikey=" + note + "\n")
+                sfz_file.write("pitch_keycenter=" + note +"\n")
+                break
+
+            sfz_file.write("\n")
 
