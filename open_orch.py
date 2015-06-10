@@ -315,7 +315,10 @@ for grp in instru_group :
           sample_list.sort(key = sample_list_key)
           for audiofile in sample_list :	
             sfz_file.write("<region>\n")
-            sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + audiofile + "\n")
+            if oodict["key"] == "phil":
+              sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + audiofile + "\n")
+            else:
+              sfz_file.write("sample=" + instru["name"] + "/" + audiofile + "\n")
             elem = string.split(audiofile, oodict["splitter"])
             for tag in elem:
 	      if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
