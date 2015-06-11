@@ -14,6 +14,24 @@ import shutil
 def Blank_Width():
   return 20
 
+
+#function to translate note to midi number
+nttonb_dict = { "C":0,"Cs":1,"Db":1,"D":2,"Ds":3,"Eb":3,"E":4,"F":5,"Fs":6,"Gb":6,"G":7,"Gs":8,"Ab":8,"A":9,"As":10,"Bb":10,"B":11}
+nbtont_dict = { nb:nt for nt,nb in nttonb_dict.items()}  
+def note_to_nb(note):
+  elem = list(note)
+  if re.match("[A-G][0-9]", note):
+    val = (int(elem[1]) + 1) * 12 + nttonb_dict[elem[0]] 
+  if re.match("[A-G][b-s][0-9]", note):
+    val = (int(elem[2]) + 1) * 12 + nttonb_dict[elem[0]+elem[1]]
+  return val
+
+
+
+def nb_to_note(nb):
+  oct = nb/12 - 1
+
+
 #function to sort sample list
 def sample_list_key(filename):
   elem = string.split(filename, oodict["splitter"])
