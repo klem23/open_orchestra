@@ -47,18 +47,18 @@ def phil_sort_lgth(filename):
   elif elem[2] == "15":
     return "/very_long/"
 
-def phil_sort_level(filename):
+def phil_sort_vel(filename):
   elem = string.split(filename, "_")
-  if elem[3] == "pianissimo":
-    return "0-25"
-  elif elem[3] == "piano":
-    return "26-50"
-  elif elem[3] == "mezzo":
-    return "51-75"
-  elif elem[3] == "forte":
-    return "76-100"
-  elif elem[3] == "fortissimo":
-    return"101-127"
+  if "mezzo" in elem[3]:
+    return "51","75"
+  elif "pianissimo" in elem[3]:
+    return "0","25"
+  elif "piano" in elem[3]:
+    return "26","50"
+  elif "forte" in elem[3]:
+    return "76","100"
+  elif "fortissimo" in elem[3]:
+    return"101","127"
 
 wave_header_fmt = "III"
 fmt_header_fmt = "IIHHIIHH"
@@ -327,6 +327,10 @@ for grp in instru_group :
                 sfz_file.write("hikey=" + note + "\n")
                 sfz_file.write("pitch_keycenter=" + note +"\n")
                 break
+            if oodict["key"] == "phil":
+              vel = phil_sort_vel(audiofile)
+              sfz_file.write("lovel=" + vel[0] + "\n")
+              sfz_file.write("hivel=" + vel[1] + "\n")
 
             sfz_file.write("\n")
 
