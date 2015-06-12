@@ -11,20 +11,54 @@ import struct
 import re
 import shutil
 
+
 def Blank_Width():
   return 20
 
+#########################
+# Sample Parser & Manager
+#########################
 
-#function to translate note to midi number
-nttonb_dict = { "C":0,"Cs":1,"Db":1,"D":2,"Ds":3,"Eb":3,"E":4,"F":5,"Fs":6,"Gb":6,"G":7,"Gs":8,"Ab":8,"A":9,"As":10,"Bb":10,"B":11}
-nbtont_dict = { nb:nt for nt,nb in nttonb_dict.items()}  
-def note_to_nb(note):
-  elem = list(note)
-  if re.match("[A-G][0-9]", note):
-    val = (int(elem[1]) + 1) * 12 + nttonb_dict[elem[0]] 
-  if re.match("[A-G][b-s][0-9]", note):
-    val = (int(elem[2]) + 1) * 12 + nttonb_dict[elem[0]+elem[1]]
-  return val
+#class for managing sample mapping
+class sample:
+  #key=-1
+  #lokey=-1
+  #hikey=-1
+  #vel=-1
+  #lovel=-1
+  #hivel=-1
+  #filename=""
+
+  nttonb_dict = { "C":0,"Cs":1,"Db":1,"D":2,"Ds":3,"Eb":3,"E":4,"F":5,"Fs":6,"Gb":6,"G":7,"Gs":8,"Ab":8,"A":9,"As":10,"Bb":10,"B":11}
+  nbtont_dict = { nb:nt for nt,nb in nttonb_dict.items()}
+
+  def __init__(self, file):
+    self.filename = file
+    self.vel = -1
+    elem = string.split(self.filename, oodict["splitter"])
+    for tag in elem:
+      if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag):
+        self.key = self.note_to_nb(tag) 
+      elif "mezzo" in tag: 
+        self.vel = 2
+      elif "pianissimo" in tag:
+        self.vel = 0
+      elif "piano" in tag:
+        self.vel = 1
+      elif "forte" in tag:
+        self.vel = 3
+      elif "fortissimo" in tag:
+        self.vel = 4
+
+  #function to translate note to midi number
+  
+  def note_to_nb(self, note):
+    elem = list(note)
+    if re.match("[A-G][0-9]", note):
+      val = (int(elem[1]) + 1) * 12 + self.nttonb_dict[elem[0]] 
+    if re.match("[A-G][b-s][0-9]", note):
+      val = (int(elem[2]) + 1) * 12 + self.nttonb_dict[elem[0]+elem[1]]
+    return val
 
 
 
@@ -32,18 +66,61 @@ def nb_to_note(nb):
   oct = nb/12 - 1
 
 
-#function to sort sample list
-def sample_list_key(filename):
-  elem = string.split(filename, oodict["splitter"])
-  for tag in elem:
-    if re.match("[A-G][0-9]", tag):
-      char_key = list(tag)
-      key = char_key[1] + char_key[0] + "d"
-    if re.match("[A-G][b-s][0-9]", tag):
-      char_key = list(tag)
-      key = char_key[2] + char_key[0] + char_key[1]
+# Sample map parser
 
-  return key
+def fill_key(sample_map):
+  #first samples
+  for smpl in sample_map[sample_map.keys()[0]]:
+    smpl.lokey = smpl.key - 3
+  #last samples
+  #for smpl in sample_map[sorted(sample_map.keys())[len(sample_map) - 1]]:
+  for smpl in sample_map[sorted(sample_map.keys())[-1]]:
+    smpl.hikey = smpl.key + 3
+
+  for idx in range(len(sample_map) - 1):
+    key_current = sorted(sample_map.keys())[idx]
+    key_next = sorted(sample_map.keys())[idx + 1]
+    diff = key_next - key_current
+    for smpl in sample_map[key_current]:  
+      smpl.hikey = key_current + diff / 2
+    for smpl in sample_map[key_next]:  
+      smpl.lokey = key_current + diff / 2 + 1
+
+def fill_vel(sample_map):
+  for sample_list in sample_map.items():
+    if len(sample_list[1]) != 1:
+      val = 0
+      vel_range = 127 / len(sample_list[1])
+      for smpl in sample_list[1]:
+        smpl.lovel = val
+        val += vel_range
+        if val > 120 : val = 127
+        smpl.hivel = val
+
+def fill_samplemap(sample_list):
+  sample_map = dict()
+  for smpl in sample_list:
+    smpl_class = sample(smpl)
+    if sample_map.has_key(smpl_class.key):
+      sample_map[smpl_class.key].append(smpl_class) 
+    else:
+      tmp = list()
+      tmp.append(smpl_class)
+      sample_map[smpl_class.key] = tmp
+  return sample_map
+
+#function to sort sample list
+#def sample_list_key(filename):
+#  elem = string.split(filename, oodict["splitter"])
+#  for tag in elem:
+#    if re.match("[A-G][0-9]", tag):
+#      char_key = list(tag)
+#      key = char_key[1] + char_key[0] + "d"
+#    if re.match("[A-G][b-s][0-9]", tag):
+#      char_key = list(tag)
+#      key = char_key[2] + char_key[0] + char_key[1]
+
+#  return key
 
 
 def phil_filter(filename):
@@ -52,8 +129,9 @@ def phil_filter(filename):
     return True
   else:
     return False
-lgth_grp = ["very_short", "short", "long", "very_long"]
 
+
+lgth_grp = ["very_short", "short", "long", "very_long"]
 def phil_sort_lgth(filename):
   elem = string.split(filename, "_")
   if elem[2] == "025":
@@ -65,18 +143,18 @@ def phil_sort_lgth(filename):
   elif elem[2] == "15":
     return "/very_long/"
 
-def phil_sort_vel(filename):
-  elem = string.split(filename, "_")
-  if "mezzo" in elem[3]:
-    return "51","75"
-  elif "pianissimo" in elem[3]:
-    return "0","25"
-  elif "piano" in elem[3]:
-    return "26","50"
-  elif "forte" in elem[3]:
-    return "76","100"
-  elif "fortissimo" in elem[3]:
-    return"101","127"
+#def phil_sort_vel(filename):
+#  elem = string.split(filename, "_")
+#  if "mezzo" in elem[3]:
+#    return "51","75"
+#  elif "pianissimo" in elem[3]:
+#    return "0","25"
+#  elif "piano" in elem[3]:
+#    return "26","50"
+#  elif "forte" in elem[3]:
+#    return "76","100"
+#  elif "fortissimo" in elem[3]:
+#    return"101","127"
 
 wave_header_fmt = "III"
 fmt_header_fmt = "IIHHIIHH"
@@ -328,27 +406,57 @@ for grp in instru_group :
 
 	
 
-
+          #list audiofile
           sample_list = os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/" + lgth_path + "/")
-          sample_list.sort(key = sample_list_key)
-          for audiofile in sample_list :	
-            sfz_file.write("<region>\n")
-            if oodict["key"] == "phil":
-              sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + audiofile + "\n")
-            else:
-              sfz_file.write("sample=" + instru["name"] + "/" + audiofile + "\n")
-            elem = string.split(audiofile, oodict["splitter"])
-            for tag in elem:
-	      if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
-                note = tag
-                sfz_file.write("lokey=" + note + "\n")
-                sfz_file.write("hikey=" + note + "\n")
-                sfz_file.write("pitch_keycenter=" + note +"\n")
-                break
-            if oodict["key"] == "phil":
-              vel = phil_sort_vel(audiofile)
-              sfz_file.write("lovel=" + vel[0] + "\n")
-              sfz_file.write("hivel=" + vel[1] + "\n")
+          #create map
+          sample_map = fill_samplemap(sample_list)
+          #sort main list (key) 
+          #sample_map.sort(key = lambda sample_list : sample_list[0])
+          #sort sub list (vel)
+          for sample_list in sample_map.items():
+            sample_list[1].sort(key = lambda sample : sample.vel)
+          #fill key
+          fill_key(sample_map)  
+          #fill vel
+          fill_vel(sample_map)
 
-            sfz_file.write("\n")
+          for sample_list in sample_map.items():
+            for smpl in sample_list[1]:
+              sfz_file.write("<region>\n")
+              if oodict["key"] == "phil":
+                sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + smpl.filename + "\n")
+              else:
+                sfz_file.write("sample=" + instru["name"] + "/" + smpl.filename + "\n")
+              sfz_file.write("pitch_keycenter=" + str(smpl.key) +"\n")
+              sfz_file.write("lokey=" + str(smpl.lokey) + "\n")
+              sfz_file.write("hikey=" + str(smpl.hikey) + "\n")
+              if hasattr(smpl, "lovel") and hasattr(smpl, "hivel"): 
+                sfz_file.write("lovel=" + str(smpl.lovel) + "\n")
+                sfz_file.write("hivel=" + str(smpl.hivel) + "\n")
+                
+              sfz_file.write("\n")
+
+          #sample_list.sort(key = sample_list_key)
+          #for audiofile in sample_list :	
+            #sfz_file.write("<region>\n")
+            #if oodict["key"] == "phil":
+            #  sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + audiofile + "\n")
+            #else:
+            #  sfz_file.write("sample=" + instru["name"] + "/" + audiofile + "\n")
+            #elem = string.split(audiofile, oodict["splitter"])
+            #for tag in elem:
+	    #  if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
+            #    note = tag
+            #    sfz_file.write("lokey=" + note + "\n")
+            #    sfz_file.write("hikey=" + note + "\n")
+            #    sfz_file.write("pitch_keycenter=" + note +"\n")
+            #    break
+            #if oodict["key"] == "phil":
+            #  vel = phil_sort_vel(audiofile)
+            #  sfz_file.write("lovel=" + vel[0] + "\n")
+            #  sfz_file.write("hivel=" + vel[1] + "\n")
+
+            #sfz_file.write("\n")
+
+          
 
