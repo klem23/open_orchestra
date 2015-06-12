@@ -8,7 +8,7 @@
  "output directory" : "Philharmonia_co_uk_sfz",
  "splitter" : "_",
  "wood" : [
-	{ "name" : "bass_clarinet", "url" : "/bass%20clarinet/bass%20clarinet.zip"},
+	{ "name" : "clarinet_bass", "url" : "/bass%20clarinet/bass%20clarinet.zip"},
 	{ "name" : "bassoon", "url" : "/bassoon/bassoon.zip"},
 	{ "name" : "clarinet", "url" : "/clarinet/clarinet.zip"},
         { "name" : "contrabasson", "url" : "/contrabassoon/contrabassoon.zip"},
