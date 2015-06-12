@@ -1,0 +1,52 @@
+#######################
+#Open Orchestra Project
+#######################
+
+
+This tool written in python aim to create orchestra sfz sample bank from nice sharing.
+The Philharmonia Orchestra based in London share samples from their musician :
+  http://www.philharmonia.co.uk/explore/make_music
+The Music departement of the University of Iowa share orchestra samples :
+  http://theremin.music.uiowa.edu/MIS.html
+
+
+So this tool download automatically all the samples (the zip package, not one by one...) from those website, 
+uncompress package, transcode file to wav format, remove blank sound at the beginning of the file,
+sort and parse all the samples by instrument and create sfz file.
+
+!!!!!!!!!!
+! You need SOX software to transcode
+!!!!!!!!!!
+and also python of course 
+
+I use LinuxSampler as SFZ player:
+http://linuxsampler.org
+
+I should host the generated bank here:
+http://klemxxiii.free.fr/
+
+
+Let me know if there is problems or bad sample to remove.
+
+The license of each sample provider is available in the output directory or in the main directory 
+of this project. There are quite permissive !
+
+
+
+
+
+###########
+#RUN
+##########
+  run :
+    python open_orch.py uiowa.json (for University of Iowa samples)
+    or
+    python open_orch.py philharmonia.json (for the Philharmonia samples)
+
+  output:
+    SFZ bank will be created in UIowa_edu_sfz or Philharmonia_co_uk_sfz directory.
+
+  temp dir:
+   uiowa_tmp and phil_tmp are temporary directory with a lot of intermediate audio files.
+   You can delete them if you need space, but keep them if you want to rerun the script and don't 
+   want to download the samples again.
