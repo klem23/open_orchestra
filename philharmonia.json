@@ -10,6 +10,29 @@
  "wood" : [
 	{ "name" : "bass_clarinet", "url" : "/bass%20clarinet/bass%20clarinet.zip"},
 	{ "name" : "bassoon", "url" : "/bassoon/bassoon.zip"},
-	{ "name" : "clarinet", "url" : "/clarinet/clarinet.zip"}
+	{ "name" : "clarinet", "url" : "/clarinet/clarinet.zip"},
+        { "name" : "contrabasson", "url" : "/contrabassoon/contrabassoon.zip"},
+        { "name" : "cor_anglais", "url" : "/cor%20anglais/cor%20anglais.zip"},
+        { "name" : "flute", "url" : "/flute/flute.zip"},
+        { "name" : "oboe", "url" : "/oboe/oboe.zip"},
+        { "name" : "saxophone", "url" : "/saxophone/saxophone.zip"}
+ ],
+ "brass" : [
+	{ "name" : "french_horn", "url" : "/french%20horn/french%20horn.zip"},
+	{ "name" : "trombone", "url" : "/trombone/trombone.zip"},
+	{ "name" : "trumpet", "url" : "/trumpet/trumpet.zip"},
+	{ "name" : "tuba", "url" : "/tuba/tuba.zip"}
+ ],
+ "string" : [
+	{ "name" : "cello", "url" : "/cello/cello.zip"},
+	{ "name" : "double_bass", "url" : "/double%20bass/double%20bass.zip"},
+	{ "name" : "viola", "url" : "/viola/viola.zip"},
+	{ "name" : "violin", "url" : "/violin/violin.zip"},
+	{ "name" : "banjo", "url" : "/banjo/banjo.zip"},
+	{ "name" : "guitar", "url" : "/guitar/guitar.zip"},
+	{ "name" : "mandolin", "url" : "/mandolin/mandolin.zip"}
+ ],
+ "perc" : [
+	{ "name" : "perc", "url" : "/percussion/percussion.zip"}
  ]
 }
