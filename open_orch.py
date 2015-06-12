@@ -21,13 +21,6 @@ def Blank_Width():
 
 #class for managing sample mapping
 class sample:
-  #key=-1
-  #lokey=-1
-  #hikey=-1
-  #vel=-1
-  #lovel=-1
-  #hivel=-1
-  #filename=""
 
   nttonb_dict = { "C":0,"Cs":1,"Db":1,"D":2,"Ds":3,"Eb":3,"E":4,"F":5,"Fs":6,"Gb":6,"G":7,"Gs":8,"Ab":8,"A":9,"As":10,"Bb":10,"B":11}
   nbtont_dict = { nb:nt for nt,nb in nttonb_dict.items()}
@@ -109,20 +102,9 @@ def fill_samplemap(sample_list):
       sample_map[smpl_class.key] = tmp
   return sample_map
 
-#function to sort sample list
-#def sample_list_key(filename):
-#  elem = string.split(filename, oodict["splitter"])
-#  for tag in elem:
-#    if re.match("[A-G][0-9]", tag):
-#      char_key = list(tag)
-#      key = char_key[1] + char_key[0] + "d"
-#    if re.match("[A-G][b-s][0-9]", tag):
-#      char_key = list(tag)
-#      key = char_key[2] + char_key[0] + char_key[1]
-
-#  return key
 
 
+#sort phil sample
 def phil_filter(filename):
   elem = string.split(filename, "_")
   if re.match("[0-9]+", elem[2]):
@@ -143,19 +125,7 @@ def phil_sort_lgth(filename):
   elif elem[2] == "15":
     return "/very_long/"
 
-#def phil_sort_vel(filename):
-#  elem = string.split(filename, "_")
-#  if "mezzo" in elem[3]:
-#    return "51","75"
-#  elif "pianissimo" in elem[3]:
-#    return "0","25"
-#  elif "piano" in elem[3]:
-#    return "26","50"
-#  elif "forte" in elem[3]:
-#    return "76","100"
-#  elif "fortissimo" in elem[3]:
-#    return"101","127"
-
+#wav file header format
 wave_header_fmt = "III"
 fmt_header_fmt = "IIHHIIHH"
 data_header_fmt = "II"
@@ -435,28 +405,4 @@ for grp in instru_group :
                 sfz_file.write("hivel=" + str(smpl.hivel) + "\n")
                 
               sfz_file.write("\n")
-
-          #sample_list.sort(key = sample_list_key)
-          #for audiofile in sample_list :	
-            #sfz_file.write("<region>\n")
-            #if oodict["key"] == "phil":
-            #  sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + audiofile + "\n")
-            #else:
-            #  sfz_file.write("sample=" + instru["name"] + "/" + audiofile + "\n")
-            #elem = string.split(audiofile, oodict["splitter"])
-            #for tag in elem:
-	    #  if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag) :
-            #    note = tag
-            #    sfz_file.write("lokey=" + note + "\n")
-            #    sfz_file.write("hikey=" + note + "\n")
-            #    sfz_file.write("pitch_keycenter=" + note +"\n")
-            #    break
-            #if oodict["key"] == "phil":
-            #  vel = phil_sort_vel(audiofile)
-            #  sfz_file.write("lovel=" + vel[0] + "\n")
-            #  sfz_file.write("hivel=" + vel[1] + "\n")
-
-            #sfz_file.write("\n")
-
-          
 
