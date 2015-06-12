@@ -63,7 +63,7 @@ def nb_to_note(nb):
 
 def fill_key(sample_map):
   #first samples
-  for smpl in sample_map[sample_map.keys()[0]]:
+  for smpl in sample_map[sorted(sample_map.keys())[0]]:
     smpl.lokey = smpl.key - 3
   #last samples
   #for smpl in sample_map[sorted(sample_map.keys())[len(sample_map) - 1]]:
