@@ -107,7 +107,7 @@ def fill_samplemap(sample_list):
 #sort phil sample
 def phil_filter(filename):
   elem = string.split(filename, "_")
-  if re.match("[0-9]+", elem[2]):
+  if re.match("[0-9]+", elem[2]) and normal in elem[-1]:
     return True
   else:
     return False
