@@ -107,23 +107,33 @@ def fill_samplemap(sample_list):
 #sort phil sample
 def phil_filter(filename):
   elem = string.split(filename, "_")
-  if re.match("[0-9]+", elem[2]) and normal in elem[-1]:
+  if re.match("[0-9]+", elem[2]):
     return True
   else:
     return False
 
-
 lgth_grp = ["very_short", "short", "long", "very_long"]
 def phil_sort_lgth(filename):
-  elem = string.split(filename, "_")
+  path=""
+  nosuffix = string.split(filename,".")
+  elem = string.split(nosuffix[0], "_")
+
   if elem[2] == "025":
-    return "/very_short/"
+    path = "/very-short"
   elif elem[2] == "05":
-    return "/short/"
+    path =  "/short"
   elif elem[2] == "1":
-    return "/long/"
+    path =  "/long"
   elif elem[2] == "15":
-    return "/very_long/"
+    path =  "/very-long"
+
+  if "normal" in elem[-1]:
+    path += "/"
+  else:
+    path += "_" + elem[-1] + "/" 
+  
+  return path
+
 
 #wav file header format
 wave_header_fmt = "III"
@@ -350,9 +360,13 @@ for grp in instru_group :
 #SFZ file writing
 ##################
 
-      lgth_list = "_"
-      if oodict["key"] == "phil":
-        lgth_list = lgth_grp
+      #lgth_list = "_"
+      #if oodict["key"] == "phil":
+      #  lgth_list = lgth_grp
+
+      lgth_list = os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/")
+      if os.path.isfile(out_dir + "/" + grp + "/" + instru["name"] + "/" + lgth_list[0]):
+        lgth_list = "_"
 
       for lgth_path in lgth_list:
         if lgth_path == "_":
