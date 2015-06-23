@@ -112,7 +112,6 @@ def phil_filter(filename):
   else:
     return False
 
-lgth_grp = ["very_short", "short", "long", "very_long"]
 def phil_sort_lgth(filename):
   path=""
   nosuffix = string.split(filename,".")
@@ -297,6 +296,8 @@ for grp in instru_group :
 	    #audio_file.seek(44)
 	    data = audio_file.read(smpl_size)
             idx = 0;
+            zero_counter = 0
+            data_counter = 0
             while data:
 	      val = struct.unpack(smpl_fmt, data)[0]
 	      if val != 0:
@@ -359,10 +360,6 @@ for grp in instru_group :
 ##################
 #SFZ file writing
 ##################
-
-      #lgth_list = "_"
-      #if oodict["key"] == "phil":
-      #  lgth_list = lgth_grp
 
       lgth_list = os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/")
       if os.path.isfile(out_dir + "/" + grp + "/" + instru["name"] + "/" + lgth_list[0]):
