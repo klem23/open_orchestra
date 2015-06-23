@@ -15,6 +15,16 @@ import shutil
 def Blank_Width():
   return 20
 
+def Zero_reset():
+  return 5
+
+def Data_reset():
+  return 10
+
+def Data_match():
+  return 100
+
+
 #########################
 # Sample Parser & Manager
 #########################
@@ -300,23 +310,37 @@ for grp in instru_group :
             data_counter = 0
             while data:
 	      val = struct.unpack(smpl_fmt, data)[0]
-	      if val != 0:
-		found = False
+	      #if val != 0:
+		#found = False
                 #if not 0 in data[1] and not 0 in data[2] and not 0 in data[3] and not 0 in data[4]:
-		for i in range(0, Blank_Width() - 1):
-	          val = struct.unpack(smpl_fmt, audio_file.read(smpl_size))[0]
-                  if val == 0:
-                   found = True
-                   break
-                if not found:
-                  print "stop :" + str(idx)
-                  break
-                else:
-                  idx += smpl_size * Blank_Width()
+		#for i in range(0, Blank_Width() - 1):
+	        #  val = struct.unpack(smpl_fmt, audio_file.read(smpl_size))[0]
+                #  if val == 0:
+                #   found = True
+                #   break
+                #if not found:
+                #  print "stop :" + str(idx)
+                #  break
+                #else:
+                #  idx += smpl_size * Blank_Width()
+
+              if val == 0:
+                zero_counter += 1
+              elif val != 0:
+                data_counter += 1
+
+              if zero_counter == Zero_reset():
+                data_counter = 0
+              elif data_counter == Data_reset():
+                zero_counter = 0
+              elif data_counter >= Data_match():
+                break
           
 	      #data = audio_file.read(Blank_Width())
 	      data = audio_file.read(smpl_size)
               idx += smpl_size
+            idx -= Data_match()
+            idx -= idx % fhd[3]
             print "final idx :" + str(idx)
 
 
