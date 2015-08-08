@@ -312,7 +312,6 @@ for grp in instru_group :
 	      val = struct.unpack(smpl_fmt, data)[0]
 	      #if val != 0:
 		#found = False
-                #if not 0 in data[1] and not 0 in data[2] and not 0 in data[3] and not 0 in data[4]:
 		#for i in range(0, Blank_Width() - 1):
 	        #  val = struct.unpack(smpl_fmt, audio_file.read(smpl_size))[0]
                 #  if val == 0:
@@ -323,6 +322,8 @@ for grp in instru_group :
                 #  break
                 #else:
                 #  idx += smpl_size * Blank_Width()
+	      #data = audio_file.read(smpl_size)
+	      #idx += smpl_size;
 
               if val == 0:
                 zero_counter += 1
