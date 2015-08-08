@@ -24,6 +24,9 @@ def Data_reset():
 def Data_match():
   return 100
 
+def Sensitivity():
+  return 0.01
+
 
 #########################
 # Sample Parser & Manager
@@ -281,12 +284,22 @@ for grp in instru_group :
             if fhd[7] == 8:
               smpl_fmt = "B"
               smpl_size = 1
+#              smpl_treshold = Sensitivity() * 
             elif fhd[7] == 16:
-              smpl_fmt = "H"
+              smpl_fmt = "h"
               smpl_size = 2 
+              smpl_treshold = Sensitivity() * 0x7FFF 
+	      print "treshold " + str(smpl_treshold)
             elif fhd[7] == 24:
-              smpl_fmt = "BBB"
+              smpl_fmt = "bbB"
               smpl_size = 3
+              smpl_treshold = Sensitivity() * 0x7FFFFF 
+	      print "treshold " + str(smpl_treshold)
+            elif fhd[7] == 32:
+              smpl_fmt = "i"
+              smpl_size = 4
+              smpl_treshold = Sensitivity() * 0x7FFFFFFF 
+	      print "treshold " + str(smpl_treshold)
 
             audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
 
@@ -309,7 +322,11 @@ for grp in instru_group :
             zero_counter = 0
             data_counter = 0
             while data:
-	      val = struct.unpack(smpl_fmt, data)[0]
+	      val_tmp = struct.unpack(smpl_fmt, data)
+              if smpl_size == 3:
+		val = val_tmp[0] + val_tmp[1] * 0xFF + val_tmp[2] * 0xFFFF
+	      else:
+		val = val_tmp[0]
 	      #if val != 0:
 		#found = False
 		#for i in range(0, Blank_Width() - 1):
@@ -325,9 +342,9 @@ for grp in instru_group :
 	      #data = audio_file.read(smpl_size)
 	      #idx += smpl_size;
 
-              if val == 0:
+              if ( val <= 0 and val > - smpl_treshold ) or (val >= 0 and val < smpl_treshold ):
                 zero_counter += 1
-              elif val != 0:
+              else:
                 data_counter += 1
 
               if zero_counter == Zero_reset():
