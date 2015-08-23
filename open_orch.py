@@ -291,7 +291,7 @@ for grp in instru_group :
               smpl_treshold = Sensitivity() * 0x7FFF 
 	      print "treshold " + str(smpl_treshold)
             elif fhd[7] == 24:
-              smpl_fmt = "bbB"
+              smpl_fmt = "bbb"
               smpl_size = 3
               smpl_treshold = Sensitivity() * 0x7FFFFF 
 	      print "treshold " + str(smpl_treshold)
@@ -325,6 +325,8 @@ for grp in instru_group :
 	      val_tmp = struct.unpack(smpl_fmt, data)
               if smpl_size == 3:
 		val = val_tmp[0] + val_tmp[1] * 0xFF + val_tmp[2] * 0xFFFF
+		#val = val_tmp[0] + val_tmp[1] << 8 + val_tmp[2] << 16
+		#val = val_tmp[1]
 	      else:
 		val = val_tmp[0]
 	      #if val != 0:
@@ -358,7 +360,7 @@ for grp in instru_group :
 	      data = audio_file.read(smpl_size)
               idx += smpl_size
             idx -= Data_match()
-            idx -= idx % fhd[3]
+            idx -= idx % (fhd[3] * smpl_size)
             print "final idx :" + str(idx)
 
 
