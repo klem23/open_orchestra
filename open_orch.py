@@ -334,8 +334,8 @@ for grp in instru_group :
 
             if amp_max >= - amp_min:
               smpl_treshold = Sensitivity() * amp_max
-            else
-              smpl_treshold = Sensitivity() * -amp_mi
+            else:
+              smpl_treshold = Sensitivity() * -amp_min
 
 	    audio_file.seek(data_pos)
 
