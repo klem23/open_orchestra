@@ -315,8 +315,31 @@ for grp in instru_group :
             dhd = struct.unpack(data_header_fmt, dh)
             print "data size " + str(dhd[1])
 
+
+            #get max amp and calcul blank remover treshold
+            data_pos = audio_file.tell();
+
+            amp_min = 0;
+            amp_max = 0;
+	    data_amp = audio_file.read(smpl_size)
+            while data_amp:
+	      val_tmp = struct.unpack(smpl_fmt, data_amp)
+              if smpl_size == 3:
+		val = val_tmp[0] + (val_tmp[1] << 8) + (val_tmp[2] << 16)
+	      else:
+		val = val_tmp[0]
+              if val > amp_max: amp_max = val
+              elif val < amp_min: amp_min = val
+	      data_amp = audio_file.read(smpl_size)
+
+            if amp_max >= - amp_min:
+              smpl_treshold = Sensitivity() * amp_max
+            else
+              smpl_treshold = Sensitivity() * -amp_mi
+
+	    audio_file.seek(data_pos)
+
           #audio_file.lseek(WAVE_HEADER)
-	    #audio_file.seek(44)
 	    data = audio_file.read(smpl_size)
             idx = 0;
             zero_counter = 0
