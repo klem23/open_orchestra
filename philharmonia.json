@@ -8,31 +8,31 @@
  "output directory" : "Philharmonia_co_uk_sfz",
  "splitter" : "_",
  "wood" : [
-	{ "name" : "clarinet_bass", "url" : "/bass%20clarinet/bass%20clarinet.zip"},
-	{ "name" : "bassoon", "url" : "/bassoon/bassoon.zip"},
-	{ "name" : "clarinet", "url" : "/clarinet/clarinet.zip"},
-        { "name" : "contrabasson", "url" : "/contrabassoon/contrabassoon.zip"},
-        { "name" : "cor_anglais", "url" : "/cor%20anglais/cor%20anglais.zip"},
-        { "name" : "flute", "url" : "/flute/flute.zip"},
-        { "name" : "oboe", "url" : "/oboe/oboe.zip"},
-        { "name" : "saxophone", "url" : "/saxophone/saxophone.zip"}
+	{ "name" : "clarinet_bass", "url" : "/bass%20clarinet/bass%20clarinet.zip", "sort": "lgth" },
+	{ "name" : "bassoon", "url" : "/bassoon/bassoon.zip", "sort": "lgth" },
+	{ "name" : "clarinet", "url" : "/clarinet/clarinet.zip", "sort": "lgth" },
+        { "name" : "contrabasson", "url" : "/contrabassoon/contrabassoon.zip", "sort": "lgth" },
+        { "name" : "cor_anglais", "url" : "/cor%20anglais/cor%20anglais.zip", "sort": "lgth" },
+        { "name" : "flute", "url" : "/flute/flute.zip", "sort": "lgth" },
+        { "name" : "oboe", "url" : "/oboe/oboe.zip", "sort": "lgth" },
+        { "name" : "saxophone", "url" : "/saxophone/saxophone.zip", "sort": "lgth" }
  ],
  "brass" : [
-	{ "name" : "french_horn", "url" : "/french%20horn/french%20horn.zip"},
-	{ "name" : "trombone", "url" : "/trombone/trombone.zip"},
-	{ "name" : "trumpet", "url" : "/trumpet/trumpet.zip"},
-	{ "name" : "tuba", "url" : "/tuba/tuba.zip"}
+	{ "name" : "french_horn", "url" : "/french%20horn/french%20horn.zip", "sort": "lgth" },
+	{ "name" : "trombone", "url" : "/trombone/trombone.zip", "sort": "lgth" },
+	{ "name" : "trumpet", "url" : "/trumpet/trumpet.zip", "sort": "lgth" },
+	{ "name" : "tuba", "url" : "/tuba/tuba.zip", "sort": "lgth" }
  ],
  "string" : [
-	{ "name" : "cello", "url" : "/cello/cello.zip"},
-	{ "name" : "double_bass", "url" : "/double%20bass/double%20bass.zip"},
-	{ "name" : "viola", "url" : "/viola/viola.zip"},
-	{ "name" : "violin", "url" : "/violin/violin.zip"},
-	{ "name" : "banjo", "url" : "/banjo/banjo.zip"},
-	{ "name" : "guitar", "url" : "/guitar/guitar.zip"},
-	{ "name" : "mandolin", "url" : "/mandolin/mandolin.zip"}
+	{ "name" : "cello", "url" : "/cello/cello.zip", "sort": "lgth" },
+	{ "name" : "double_bass", "url" : "/double%20bass/double%20bass.zip", "sort": "lgth" },
+	{ "name" : "viola", "url" : "/viola/viola.zip", "sort": "lgth" },
+	{ "name" : "violin", "url" : "/violin/violin.zip", "sort": "lgth" },
+	{ "name" : "banjo", "url" : "/banjo/banjo.zip", "sort": "none" },
+	{ "name" : "guitar", "url" : "/guitar/guitar.zip", "sort": "none" },
+	{ "name" : "mandolin", "url" : "/mandolin/mandolin.zip", "sort": "none" }
  ],
  "perc" : [
-	{ "name" : "perc", "url" : "/percussion/percussion.zip"}
+	{ "name" : "perc", "url" : "/percussion/percussion.zip", "sort": "perc" }
  ]
 }

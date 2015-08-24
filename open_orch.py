@@ -118,14 +118,14 @@ def fill_samplemap(sample_list):
 
 
 #sort phil sample
-def phil_filter(filename):
+def lgth_filter(filename):
   elem = string.split(filename, "_")
   if re.match("[0-9]+", elem[2]):
     return True
   else:
     return False
 
-def phil_sort_lgth(filename):
+def sort_lgth(filename):
   path=""
   nosuffix = string.split(filename,".")
   elem = string.split(nosuffix[0], "_")
@@ -230,8 +230,9 @@ for grp in instru_group :
       #Transcode
       for infile in os.listdir(xtract_dir):
         print "transcoding : " + infile
-        if oodict["key"] == "phil":
-          if not phil_filter(infile):
+        #if oodict["key"] == "phil":
+        if instru["sort"] == "lgth":
+          if not lgth_filter(infile):
             print "Jump file as it's not a note"
             continue
 	if (infile==".") or (infile=="..") :
@@ -389,8 +390,9 @@ for grp in instru_group :
 
           #Prepare for copying
             lgth = ""
-            if oodict["key"] == "phil":
-              lgth = phil_sort_lgth(infile)
+            #if oodict["key"] == "phil":
+            if instru["sort"] == "lgth":
+              lgth = sort_lgth(infile)
               if not os.path.exists(sfz_sample_dir + lgth):
                 os.makedirs(sfz_sample_dir + lgth)
 
