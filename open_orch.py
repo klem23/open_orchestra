@@ -473,7 +473,8 @@ for grp in instru_group :
           for sample_list in sample_map.items():
             for smpl in sample_list[1]:
               sfz_file.write("<region>\n")
-              if oodict["key"] == "phil":
+              #if oodict["key"] == "phil":
+	      if instru["sort"] == "lgth":
                 sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + smpl.filename + "\n")
               else:
                 sfz_file.write("sample=" + instru["name"] + "/" + smpl.filename + "\n")
