@@ -25,7 +25,7 @@ def Data_match():
   return 100
 
 def Sensitivity():
-  return 0.01
+  return 0.05
 
 
 #########################
@@ -383,7 +383,7 @@ for grp in instru_group :
 	      #data = audio_file.read(Blank_Width())
 	      data = audio_file.read(smpl_size)
               idx += smpl_size
-            idx -= Data_match()
+            idx -= Data_match() * smpl_size
             idx -= idx % (fhd[3] * smpl_size)
             print "final idx :" + str(idx)
 
