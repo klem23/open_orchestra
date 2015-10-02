@@ -61,9 +61,9 @@ class sample:
   def note_to_nb(self, note):
     elem = list(note)
     if re.match("[A-G][0-9]", note):
-      val = (int(elem[1]) + 1) * 12 + self.nttonb_dict[elem[0]] 
+      val = (int(elem[1]) + 2) * 12 + self.nttonb_dict[elem[0]] 
     if re.match("[A-G][b-s][0-9]", note):
-      val = (int(elem[2]) + 1) * 12 + self.nttonb_dict[elem[0]+elem[1]]
+      val = (int(elem[2]) + 2) * 12 + self.nttonb_dict[elem[0]+elem[1]]
     return val
 
 
