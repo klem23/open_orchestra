@@ -11,6 +11,7 @@ import struct
 import re
 import shutil
 
+import trim
 
 def Blank_Width():
   return 20
@@ -258,7 +259,7 @@ for grp in instru_group :
           os.makedirs(sfz_sample_dir)
 
 
-
+        """
         print "Blank remover " + outfile
         try:
           with open(outfile, 'rb') as audio_file: 
@@ -386,9 +387,29 @@ for grp in instru_group :
             idx -= Data_match() * smpl_size
             idx -= idx % (fhd[3] * smpl_size)
             print "final idx :" + str(idx)
+"""
+
+        #Prepare for copying
+        idx = trim.getSimpleTrim(outfile)
+        try:
+          with open(outfile, 'rb') as audio_file:
+
+            wh = audio_file.read(Wave_Header_Size())
+            whd = struct.unpack(wave_header_fmt, wh)
+            #print whd[0] 
+            fh = audio_file.read(Fmt_Header_Size())
+            fhd = struct.unpack(fmt_header_fmt, fh)
+
+            audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
+            #if data is not PCM => extended header
+            if fhd[2] != 1:
+              facth = audio_file.read(8)
+              facthd = struct.unpack("II", facth)
+              factdatah = audio_file.read(facthd[1])
+              print facthd[1]
 
 
-          #Prepare for copying
+
             lgth = ""
             #if oodict["key"] == "phil":
             if instru["sort"] == "lgth":
