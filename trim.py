@@ -243,17 +243,17 @@ def getNRJTrim(outfile):
         counter += 1
         if counter >= Window_size():
           nrjTab.append(accu)
+          average += accu
           accu = 0
           counter = 0
-          average += accu
         data = audio_file.read(smpl_size)
-      
+
       average /= len(nrjTab)
       i = 0
       while i < len(nrjTab) and nrjTab[i] < average / 2 :
         i += 1
       if i != len(nrjTab): 
-        idx = i
+        idx = i * Window_size()
 
     print "final idx :" + str(idx)
     return idx
