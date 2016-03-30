@@ -254,6 +254,8 @@ def getNRJTrim(outfile):
         i += 1
       if i != len(nrjTab): 
         idx = i * Window_size()
+        idx -= idx % (fhd[3] * smpl_size)
+
 
     print "final idx :" + str(idx)
     return idx
