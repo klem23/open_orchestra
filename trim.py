@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import struct
-
+import array
 
 def Blank_Width():
   return 20
@@ -18,7 +18,8 @@ def Data_match():
 def Sensitivity():
   return 0.05
 
-
+def Window_size():
+  return 1024
 
 #wav file header format
 wave_header_fmt = "III"
@@ -225,8 +226,36 @@ def getNRJTrim(outfile):
 
 
       #get max amp and calcul blank remover treshold
+      data = audio_file.read(smpl_size)
+      idx = 0;
+      accu = 0
+      counter = 0
+      average = 0
+      nrjTab = []
+      while data:
+        val_tmp = struct.unpack(smpl_fmt, data)
+        if smpl_size == 3:
+          val = val_tmp[0] + val_tmp[1] * 0xFF + val_tmp[2] * 0xFFFF
+          #val = val_tmp[0] + val_tmp[1] << 8 + val_tmp[2] << 16
+        else:
+          val = val_tmp[0]
+        accu += val * val
+        counter += 1
+        if counter >= Window_size():
+          nrjTab.append(accu)
+          accu = 0
+          counter = 0
+          average += accu
+        data = audio_file.read(smpl_size)
+      
+      average /= len(nrjTab)
+      i = 0
+      while i < len(nrjTab) and nrjTab[i] < average / 2 :
+        i += 1
+      if i != len(nrjTab): 
+        idx = i
 
-    idx=0
+    print "final idx :" + str(idx)
     return idx
 
   except IOError :

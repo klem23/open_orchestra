@@ -390,7 +390,8 @@ for grp in instru_group :
 """
 
         #Prepare for copying
-        idx = trim.getSimpleTrim(outfile)
+        #idx = trim.getSimpleTrim(outfile)
+        idx = trim.getNRJTrim(outfile)
         try:
           with open(outfile, 'rb') as audio_file:
 
