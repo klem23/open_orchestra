@@ -18,6 +18,8 @@ sort and parse all the samples by instrument and create sfz file.
 ! You need SOX software to transcode
 !!!!!!!!!!
 and also python of course 
+and python module requests
+
 
 I use LinuxSampler as SFZ player:
 http://linuxsampler.org
