@@ -168,7 +168,8 @@ def Fmt_Header_Size():
 def Data_Header_Size():
   return 8
 
-instru_group = ["brass", "wood", "string", "perc"]
+#instru_group = ["brass", "wood", "string", "perc"]
+instru_group = ["perc"]
 
 ##########
 #Main Code
@@ -251,7 +252,7 @@ for grp in instru_group :
              
 
       #Transcode
-      for infile in audiofile:
+      for i, infile in enumerate(audiofile):
         print("transcoding : ", infile)
         #if oodict["key"] == "phil":
         if instru["sort"] == "lgth":
@@ -309,6 +310,15 @@ for grp in instru_group :
               lgth = sort_lgth(outfile)
               if not os.path.exists(sfz_sample_dir + lgth):
                 os.makedirs(sfz_sample_dir + lgth)
+
+            #more perc than midi note
+            if instru["sort"] == "perc_cut":
+              if i <= 60: lgth = "/1/"
+              if i > 60 and i <= 120: lgth = "/2/"
+              if i > 120: lgth = "/3/"
+              if not os.path.exists(sfz_sample_dir + lgth):
+                os.makedirs(sfz_sample_dir + lgth)
+
 
             blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(os.path.basename(outfile))[0] + ".wav"
             audio_file.seek(0)
@@ -378,7 +388,7 @@ for grp in instru_group :
           for sample_list in sample_map.items():
             sample_list[1].sort(key = lambda sample : sample.vel)
           #fill key
-          if instru["sort"] == "perc":
+          if instru["sort"] == "perc" or instru["sort"] == "perc_cut":
              fill_key_perc(sample_map)
           else:
              fill_key(sample_map)  
@@ -389,7 +399,7 @@ for grp in instru_group :
             for smpl in sample_list[1]:
               sfz_file.write("<region>\n")
               #if oodict["key"] == "phil":
-              if instru["sort"] == "lgth":
+              if instru["sort"] == "lgth" or instru["sort"] == "perc_cut":
                 sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + smpl.filename + "\n")
               else:
                 sfz_file.write("sample=" + instru["name"] + "/" + smpl.filename + "\n")

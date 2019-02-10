@@ -33,6 +33,6 @@
 	{ "name" : "mandolin", "url" : "/mandolin/mandolin.zip", "sort": "none" }
  ],
  "perc" : [
-	{ "name" : "perc", "url" : "/percussion/percussion.zip", "sort": "perc" }
+	{ "name" : "perc", "url" : "/percussion/percussion.zip", "sort": "perc_cut" }
  ]
 }
