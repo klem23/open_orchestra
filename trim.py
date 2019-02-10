@@ -39,26 +39,26 @@ def Data_Header_Size():
 
 def getSimpleTrim(outfile):
 
-  print "Blank remover " + outfile
+  print("Blank remover ", outfile)
   try:
     with open(outfile, 'rb') as audio_file:
 
       wh = audio_file.read(Wave_Header_Size())
       whd = struct.unpack(wave_header_fmt, wh)
-      #print whd[0] 
+      #print(whd[0])
 
       fh = audio_file.read(Fmt_Header_Size())
       fhd = struct.unpack(fmt_header_fmt, fh)
-      print fhd[1]
+      print(fhd[1])
 
       #audio format
-      print "format " + str(fhd[2])
+      print("format ", str(fhd[2]))
       #channels
-      print "channels " + str(fhd[3])
+      print("channels ", str(fhd[3]))
       #srate
-      print "srate " + str(fhd[4])
+      print("srate ", str(fhd[4]))
       #bitdepth
-      print "bitdepth " + str(fhd[7])
+      print("bitdepth ", str(fhd[7]))
 
       if fhd[7] == 8:
         smpl_fmt = "B"
@@ -68,17 +68,17 @@ def getSimpleTrim(outfile):
         smpl_fmt = "h"
         smpl_size = 2
         smpl_treshold = Sensitivity() * 0x7FFF
-        print "treshold " + str(smpl_treshold)
+        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 24:
         smpl_fmt = "bbb"
         smpl_size = 3
         smpl_treshold = Sensitivity() * 0x7FFFFF
-        print "treshold " + str(smpl_treshold)
+        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 32:
         smpl_fmt = "i"
         smpl_size = 4
         smpl_treshold = Sensitivity() * 0x7FFFFFFF
-        print "treshold " + str(smpl_treshold)
+        print("treshold ", str(smpl_treshold))
 
       audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
 
@@ -87,11 +87,11 @@ def getSimpleTrim(outfile):
         facth = audio_file.read(8)
         facthd = struct.unpack("II", facth)
         factdatah = audio_file.read(facthd[1])
-        print facthd[1]
+        print(facthd[1])
 
       dh = audio_file.read(Data_Header_Size())
       dhd = struct.unpack(data_header_fmt, dh)
-      print "data size " + str(dhd[1])
+      print("data size ", str(dhd[1]))
 
 
       #get max amp and calcul blank remover treshold
@@ -161,36 +161,36 @@ def getSimpleTrim(outfile):
         idx += smpl_size
       idx -= Data_match() * smpl_size
       idx -= idx % (fhd[3] * smpl_size)
-      print "final idx :" + str(idx)
+      print("final idx :", str(idx))
 
     return idx
 
   except IOError :
-    print "Error opening file, next " + outfile
+    print("Error opening file, next ", outfile)
     return 0
 
  
 def getNRJTrim(outfile):
-  print "NRJ Blank remover " + outfile
+  print("NRJ Blank remover ", outfile)
   try:
     with open(outfile, 'rb') as audio_file:
 
       wh = audio_file.read(Wave_Header_Size())
       whd = struct.unpack(wave_header_fmt, wh)
-      #print whd[0] 
+      #print(whd[0])
 
       fh = audio_file.read(Fmt_Header_Size())
       fhd = struct.unpack(fmt_header_fmt, fh)
-      print fhd[1]
+      print(fhd[1])
 
       #audio format
-      print "format " + str(fhd[2])
+      print("format ", str(fhd[2]))
       #channels
-      print "channels " + str(fhd[3])
+      print("channels ", str(fhd[3]))
       #srate
-      print "srate " + str(fhd[4])
+      print("srate ", str(fhd[4]))
       #bitdepth
-      print "bitdepth " + str(fhd[7])
+      print("bitdepth ", str(fhd[7]))
 
       if fhd[7] == 8:
         smpl_fmt = "B"
@@ -200,17 +200,17 @@ def getNRJTrim(outfile):
         smpl_fmt = "h"
         smpl_size = 2
         smpl_treshold = Sensitivity() * 0x7FFF
-        print "treshold " + str(smpl_treshold)
+        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 24:
         smpl_fmt = "bbb"
         smpl_size = 3
         smpl_treshold = Sensitivity() * 0x7FFFFF
-        print "treshold " + str(smpl_treshold)
+        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 32:
         smpl_fmt = "i"
         smpl_size = 4
         smpl_treshold = Sensitivity() * 0x7FFFFFFF
-        print "treshold " + str(smpl_treshold)
+        print("treshold ", str(smpl_treshold))
 
       audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
 
@@ -222,7 +222,7 @@ def getNRJTrim(outfile):
 
       dh = audio_file.read(Data_Header_Size())
       dhd = struct.unpack(data_header_fmt, dh)
-      print "data size " + str(dhd[1])
+      print("data size ", str(dhd[1]))
 
 
       #get max amp and calcul blank remover treshold
@@ -257,11 +257,11 @@ def getNRJTrim(outfile):
         idx -= idx % (fhd[3] * smpl_size)
 
 
-    print "final idx :" + str(idx)
+    print("final idx :", str(idx))
     return idx
 
   except IOError :
-    print "Error opening file, next " + outfile
+    print("Error opening file, next ", outfile)
     return 0
 
 

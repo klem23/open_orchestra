@@ -5,7 +5,7 @@ import sys
 import subprocess
 import string
 import zipfile
-import urllib
+import requests
 import json
 import struct
 import re
@@ -42,7 +42,8 @@ class sample:
   def __init__(self, file):
     self.filename = file
     self.vel = -1
-    elem = string.split(self.filename, oodict["splitter"])
+    self.key = -1
+    elem = self.filename.split(oodict["splitter"])
     for tag in elem:
       if re.match("[A-G][0-9]", tag) or re.match("[A-G][b-s][0-9]", tag):
         self.key = self.note_to_nb(tag) 
@@ -74,6 +75,10 @@ def nb_to_note(nb):
 
 
 # Sample map parser
+def fill_key_perc(sample_map):
+  for smpl in sample_map.items():
+    #for smpl in sample_list[1]:
+      smpl[1][0].lokey = smpl[1][0].hikey = smpl[1][0].key
 
 def fill_key(sample_map):
   #first samples
@@ -89,26 +94,28 @@ def fill_key(sample_map):
     key_next = sorted(sample_map.keys())[idx + 1]
     diff = key_next - key_current
     for smpl in sample_map[key_current]:  
-      smpl.hikey = key_current + diff / 2
+      smpl.hikey = key_current + diff // 2
     for smpl in sample_map[key_next]:  
-      smpl.lokey = key_current + diff / 2 + 1
+      smpl.lokey = key_current + diff // 2 + 1
 
 def fill_vel(sample_map):
   for sample_list in sample_map.items():
     if len(sample_list[1]) != 1:
       val = 0
-      vel_range = 127 / len(sample_list[1])
+      vel_range = 127 // len(sample_list[1])
       for smpl in sample_list[1]:
         smpl.lovel = val
         val += vel_range
         if val > 120 : val = 127
-        smpl.hivel = val
+        smpl.hivel = val - 1
 
 def fill_samplemap(sample_list):
   sample_map = dict()
-  for smpl in sample_list:
+  for i, smpl in enumerate(sample_list):
     smpl_class = sample(smpl)
-    if sample_map.has_key(smpl_class.key):
+    if smpl_class.key == -1: 
+      smpl_class.key = 48 + i
+    if smpl_class.key in sample_map:
       sample_map[smpl_class.key].append(smpl_class) 
     else:
       tmp = list()
@@ -120,7 +127,7 @@ def fill_samplemap(sample_list):
 
 #sort phil sample
 def lgth_filter(filename):
-  elem = string.split(filename, "_")
+  elem = filename.split("_")
   if re.match("[0-9]+", elem[2]):
     return True
   else:
@@ -128,8 +135,7 @@ def lgth_filter(filename):
 
 def sort_lgth(filename):
   path=""
-  nosuffix = string.split(filename,".")
-  elem = string.split(nosuffix[0], "_")
+  elem = os.path.basename(filename).split("_")
 
   if elem[2] == "025":
     path = "/very-short"
@@ -169,7 +175,7 @@ instru_group = ["brass", "wood", "string", "perc"]
 ##########
 
 
-print "Using orchestra " + str(sys.argv[1])
+print("Using orchestra ", str(sys.argv[1]))
 
 
 ############
@@ -199,12 +205,14 @@ for grp in instru_group :
     for instru in oodict[grp] :
 
       #zip destination file
-      dst_file = dwnld_dir + string.replace(os.path.basename(instru["url"]), "%20", "_")
+      dst_file = dwnld_dir + os.path.basename(instru["url"]).replace("%20", "_")
 
       if not os.path.exists(dst_file) :
         #Download
-	print "Downloading " + oodict["input url"] + instru["url"]
-        urllib.urlretrieve (oodict["input url"] + instru["url"], dst_file)
+        print("Downloading ", oodict["input url"], instru["url"] )
+        response = requests.get(oodict["input url"] + instru["url"], stream=True)
+        with open(dst_file, 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
 
       #Create output dir for unzipped sample
       xtract_dir = tmp_dir + "/xtract/" + grp + "/" + instru["name"] + "/"
@@ -213,7 +221,7 @@ for grp in instru_group :
 
       #Extract
       if not os.listdir(xtract_dir):
-        print "Extract " + dst_file
+        print("Extract ", dst_file)
         file_zip = zipfile.ZipFile(dst_file, "r")
         file_zip.extractall(xtract_dir)
         file_zip.close()
@@ -228,25 +236,39 @@ for grp in instru_group :
       if not os.path.exists(wav_sample_dir):
         os.makedirs(wav_sample_dir)
 
+      #list dir recursively
+      audiofile = list()
+      for inifile in os.listdir(xtract_dir):
+        if (inifile==".") or (inifile==".."):
+          continue
+        if os.path.isdir(xtract_dir + inifile):
+          for iniifile in os.listdir(xtract_dir + inifile):
+            if (inifile==".") or (inifile==".."):
+              continue
+            audiofile.append(inifile + "/" + iniifile)
+        else:
+          audiofile.append(inifile)
+             
+
       #Transcode
-      for infile in os.listdir(xtract_dir):
-        print "transcoding : " + infile
+      for infile in audiofile:
+        print("transcoding : ", infile)
         #if oodict["key"] == "phil":
         if instru["sort"] == "lgth":
           if not lgth_filter(infile):
-            print "Jump file as it's not a note"
+            print("Jump file as it's not a note")
             continue
-	if (infile==".") or (infile=="..") :
-	  continue
-        outfile = wav_sample_dir + os.path.splitext(infile)[0] + ".wav"
+        if (infile==".") or (infile==".."):
+          continue
+        outfile = wav_sample_dir + os.path.splitext(os.path.basename(infile))[0] + ".wav"
         try:
-	  cmd = ["sox", xtract_dir + infile, outfile]
-	  #print "command :" + str(cmd)
+          cmd = ["sox", xtract_dir + infile, outfile]
+          #print("command :", str(cmd))
           subprocess.call(cmd)
         except OSError as e:
-	  print "SOX programm for converting audio files has encounter a problem : " 
-	  print "ERRNO " + str(e.errno) + " : " + e.strerror
-	  exit()
+          print("SOX programm for converting audio files has encounter a problem : ") 
+          print("ERRNO ", str(e.errno), " : ", e.strerror)
+          exit()
 
 
 ###############
@@ -258,136 +280,6 @@ for grp in instru_group :
         if not os.path.exists(sfz_sample_dir):
           os.makedirs(sfz_sample_dir)
 
-
-        """
-        print "Blank remover " + outfile
-        try:
-          with open(outfile, 'rb') as audio_file: 
-
-	    wh = audio_file.read(Wave_Header_Size())
-            whd = struct.unpack(wave_header_fmt, wh)
-
-            #print whd[0] 
-
-            fh = audio_file.read(Fmt_Header_Size())
-            fhd = struct.unpack(fmt_header_fmt, fh)
-
-            print fhd[1]
-
-            #audio format
-            print "format " + str(fhd[2])
-            #channels
-            print "channels " + str(fhd[3])
-            #srate
-            print "srate " + str(fhd[4])
-            #bitdepth
-            print "bitdepth " + str(fhd[7])
-
-            if fhd[7] == 8:
-              smpl_fmt = "B"
-              smpl_size = 1
-#              smpl_treshold = Sensitivity() * 
-            elif fhd[7] == 16:
-              smpl_fmt = "h"
-              smpl_size = 2 
-              smpl_treshold = Sensitivity() * 0x7FFF 
-	      print "treshold " + str(smpl_treshold)
-            elif fhd[7] == 24:
-              smpl_fmt = "bbb"
-              smpl_size = 3
-              smpl_treshold = Sensitivity() * 0x7FFFFF 
-	      print "treshold " + str(smpl_treshold)
-            elif fhd[7] == 32:
-              smpl_fmt = "i"
-              smpl_size = 4
-              smpl_treshold = Sensitivity() * 0x7FFFFFFF 
-	      print "treshold " + str(smpl_treshold)
-
-            audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
-
-            #if data is not PCM => extended header
-            if fhd[2] != 1:
-              facth = audio_file.read(8)
-              facthd = struct.unpack("II", facth)
-              factdatah = audio_file.read(facthd[1])	
-              print facthd[1]
-          
-
-            dh = audio_file.read(Data_Header_Size())
-            dhd = struct.unpack(data_header_fmt, dh)
-            print "data size " + str(dhd[1])
-
-
-            #get max amp and calcul blank remover treshold
-            data_pos = audio_file.tell();
-
-            amp_min = 0;
-            amp_max = 0;
-	    data_amp = audio_file.read(smpl_size)
-            while data_amp:
-	      val_tmp = struct.unpack(smpl_fmt, data_amp)
-              if smpl_size == 3:
-		val = val_tmp[0] + (val_tmp[1] << 8) + (val_tmp[2] << 16)
-	      else:
-		val = val_tmp[0]
-              if val > amp_max: amp_max = val
-              elif val < amp_min: amp_min = val
-	      data_amp = audio_file.read(smpl_size)
-
-            if amp_max >= - amp_min:
-              smpl_treshold = Sensitivity() * amp_max
-            else:
-              smpl_treshold = Sensitivity() * -amp_min
-
-	    audio_file.seek(data_pos)
-
-          #audio_file.lseek(WAVE_HEADER)
-	    data = audio_file.read(smpl_size)
-            idx = 0;
-            zero_counter = 0
-            data_counter = 0
-            while data:
-	      val_tmp = struct.unpack(smpl_fmt, data)
-              if smpl_size == 3:
-		val = val_tmp[0] + val_tmp[1] * 0xFF + val_tmp[2] * 0xFFFF
-		#val = val_tmp[0] + val_tmp[1] << 8 + val_tmp[2] << 16
-		#val = val_tmp[1]
-	      else:
-		val = val_tmp[0]
-	      #if val != 0:
-		#found = False
-		#for i in range(0, Blank_Width() - 1):
-	        #  val = struct.unpack(smpl_fmt, audio_file.read(smpl_size))[0]
-                #  if val == 0:
-                #   found = True
-                #   break
-                #if not found:
-                #  print "stop :" + str(idx)
-                #  break
-                #else:
-                #  idx += smpl_size * Blank_Width()
-	      #data = audio_file.read(smpl_size)
-	      #idx += smpl_size;
-
-              if ( val <= 0 and val > - smpl_treshold ) or (val >= 0 and val < smpl_treshold ):
-                zero_counter += 1
-              else:
-                data_counter += 1
-
-              if zero_counter == Zero_reset():
-                data_counter = 0
-              elif data_counter == Data_reset():
-                zero_counter = 0
-              elif data_counter >= Data_match():
-                break
-          
-	      #data = audio_file.read(Blank_Width())
-	      data = audio_file.read(smpl_size)
-              idx += smpl_size
-            idx -= Data_match() * smpl_size
-            idx -= idx % (fhd[3] * smpl_size)
-            print "final idx :" + str(idx)
-"""
 
         #Prepare for copying
         #idx = trim.getSimpleTrim(outfile)
@@ -407,45 +299,43 @@ for grp in instru_group :
               facth = audio_file.read(8)
               facthd = struct.unpack("II", facth)
               factdatah = audio_file.read(facthd[1])
-              print facthd[1]
+              print(facthd[1])
 
 
 
             lgth = ""
             #if oodict["key"] == "phil":
             if instru["sort"] == "lgth":
-              lgth = sort_lgth(infile)
+              lgth = sort_lgth(outfile)
               if not os.path.exists(sfz_sample_dir + lgth):
                 os.makedirs(sfz_sample_dir + lgth)
 
-            blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(infile)[0] + ".wav"
+            blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(os.path.basename(outfile))[0] + ".wav"
             audio_file.seek(0)
             with open(blank_out_file, 'wb') as bo_file: 
-              #WAVE HEADER 
+            #WAVE HEADER 
+              #copy RIFF
               bo_file.write(audio_file.read(4))
+              #change & write size - idx
               bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
+              #copy WAVE
               bo_file.write(audio_file.read(4))
-          #copy RIFF
-          #change & write size - idx
-          #copy WAVE
-              #FMT header
+           #FMT header
               #bo_file.write(audio_file.read(24))
               bo_file.write(audio_file.read(8 + fhd[1]))
               #if data is not PCM => extended header
               if fhd[2] != 1:
                 bo_file.write(audio_file.read(8 + facthd[1]))
           
-              #DATA 
+           #DATA 
               bo_file.write(audio_file.read(4))
               bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
               audio_file.seek(idx, 1)
               bo_file.write(audio_file.read())
 
 
-	  #wave_header -> new size
-	  #copy file without zero
         except IOError :
-          print "Error opening file, next " + outfile
+          print("Error opening file, next ", outfile)
           continue
 
 ##################
@@ -462,7 +352,7 @@ for grp in instru_group :
           sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + ".sfz"
         else:
           sfz_file_name = out_dir + "/" + grp + "/" + instru["name"] + "_" + lgth_path + ".sfz"
-        print "Create SFZ file : " + sfz_file_name
+        print("Create SFZ file : ", sfz_file_name)
         with open(sfz_file_name, 'w') as sfz_file: 
           sfz_file.write("// ----------------------\n")
           sfz_file.write("//  Open Orchestra\n")
@@ -488,7 +378,10 @@ for grp in instru_group :
           for sample_list in sample_map.items():
             sample_list[1].sort(key = lambda sample : sample.vel)
           #fill key
-          fill_key(sample_map)  
+          if instru["sort"] == "perc":
+             fill_key_perc(sample_map)
+          else:
+             fill_key(sample_map)  
           #fill vel
           fill_vel(sample_map)
 
@@ -496,7 +389,7 @@ for grp in instru_group :
             for smpl in sample_list[1]:
               sfz_file.write("<region>\n")
               #if oodict["key"] == "phil":
-	      if instru["sort"] == "lgth":
+              if instru["sort"] == "lgth":
                 sfz_file.write("sample=" + instru["name"] + "/" + lgth_path + "/" + smpl.filename + "\n")
               else:
                 sfz_file.write("sample=" + instru["name"] + "/" + smpl.filename + "\n")
