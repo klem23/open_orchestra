@@ -168,8 +168,7 @@ def Fmt_Header_Size():
 def Data_Header_Size():
   return 8
 
-#instru_group = ["brass", "wood", "string", "perc"]
-instru_group = ["perc"]
+instru_group = ["brass", "wood", "string", "perc"]
 
 ##########
 #Main Code
