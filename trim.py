@@ -18,6 +18,9 @@ def Data_match():
 def Sensitivity():
   return 0.05
 
+def NRJSensitivity():
+  return 0.1
+
 def Window_size():
   return 1024
 
@@ -63,23 +66,21 @@ def getSimpleTrim(outfile):
       if fhd[7] == 8:
         smpl_fmt = "B"
         smpl_size = 1
-#        smpl_treshold = Sensitivity() * 
+        smpl_treshold = Sensitivity() * 0xFF 
       elif fhd[7] == 16:
         smpl_fmt = "h"
         smpl_size = 2
         smpl_treshold = Sensitivity() * 0x7FFF
-        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 24:
         smpl_fmt = "bbb"
         smpl_size = 3
         smpl_treshold = Sensitivity() * 0x7FFFFF
-        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 32:
         smpl_fmt = "i"
         smpl_size = 4
         smpl_treshold = Sensitivity() * 0x7FFFFFFF
-        print("treshold ", str(smpl_treshold))
 
+      print("treshold ", str(smpl_treshold))
       audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
 
       #if data is not PCM => extended header
@@ -129,20 +130,6 @@ def getSimpleTrim(outfile):
           #val = val_tmp[0] + val_tmp[1] << 8 + val_tmp[2] << 16
         else:
           val = val_tmp[0]
-        #if val != 0:
-           #found = False
-           #for i in range(0, Blank_Width() - 1):
-           #  val = struct.unpack(smpl_fmt, audio_file.read(smpl_size))[0]
-           #  if val == 0:
-           #   found = True
-           #   break
-           #if not found:
-           #  print "stop :" + str(idx)
-           #  break
-           #else:
-           #  idx += smpl_size * Blank_Width()
-           #data = audio_file.read(smpl_size)
-           #idx += smpl_size;
 
         if ( val <= 0 and val > - smpl_treshold ) or (val >= 0 and val < smpl_treshold ):
           zero_counter += 1
@@ -195,23 +182,21 @@ def getNRJTrim(outfile):
       if fhd[7] == 8:
         smpl_fmt = "B"
         smpl_size = 1
-#        smpl_treshold = Sensitivity() * 
+        smpl_treshold = Sensitivity() * 0xFF 
       elif fhd[7] == 16:
         smpl_fmt = "h"
         smpl_size = 2
         smpl_treshold = Sensitivity() * 0x7FFF
-        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 24:
         smpl_fmt = "bbb"
         smpl_size = 3
         smpl_treshold = Sensitivity() * 0x7FFFFF
-        print("treshold ", str(smpl_treshold))
       elif fhd[7] == 32:
         smpl_fmt = "i"
         smpl_size = 4
         smpl_treshold = Sensitivity() * 0x7FFFFFFF
-        print("treshold ", str(smpl_treshold))
 
+      print("treshold ", str(smpl_treshold))
       audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
 
       #if data is not PCM => extended header
@@ -250,10 +235,10 @@ def getNRJTrim(outfile):
 
       average /= len(nrjTab)
       i = 0
-      while i < len(nrjTab) and nrjTab[i] < average / 2 :
+      while i < len(nrjTab) and nrjTab[i] < average * NRJSensitivity() :
         i += 1
       if i != len(nrjTab): 
-        idx = i * Window_size()
+        idx = i * Window_size() * smpl_size
         idx -= idx % (fhd[3] * smpl_size)
 
 
