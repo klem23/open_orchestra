@@ -13,21 +13,6 @@ import shutil
 
 import trim
 
-def Blank_Width():
-  return 20
-
-def Zero_reset():
-  return 5
-
-def Data_reset():
-  return 10
-
-def Data_match():
-  return 100
-
-def Sensitivity():
-  return 0.05
-
 
 #########################
 # Sample Parser & Manager
@@ -102,11 +87,11 @@ def fill_vel(sample_map):
   for sample_list in sample_map.items():
     if len(sample_list[1]) != 1:
       val = 0
-      vel_range = 127 // len(sample_list[1])
+      vel_range = 127 // len(sample_list[1]) + 1 #no rounding, take always upper value
       for smpl in sample_list[1]:
         smpl.lovel = val
         val += vel_range
-        if val > 120 : val = 127
+        if val > 120 : val = 128 #adjust rounding
         smpl.hivel = val - 1
 
 def fill_samplemap(sample_list):
@@ -146,10 +131,14 @@ def sort_lgth(filename):
   elif elem[2] == "15":
     path =  "/very-long"
 
+
+  if "pizz" in elem[-1]:
+    path += "_pizz"
+
   if "normal" in elem[-1]:
     path += "/"
   else:
-    path += "_" + elem[-1] + "/" 
+    path += "_" + os.path.splitext(elem[-1])[0] + "/" 
   
   return path
 
