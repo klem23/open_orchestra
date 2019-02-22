@@ -13,11 +13,9 @@ import shutil
 
 import trim
 
-
 #########################
 # Sample Parser & Manager
 #########################
-
 #class for managing sample mapping
 class sample:
 
@@ -109,7 +107,6 @@ def fill_samplemap(sample_list):
   return sample_map
 
 
-
 #sort phil sample
 def lgth_filter(filename):
   elem = filename.split("_")
@@ -163,9 +160,11 @@ instru_group = ["brass", "wood", "string", "perc"]
 #Main Code
 ##########
 
+if len(sys.argv) < 2:
+  print("Give a json sample dictionary please")
+  exit()
 
 print("Using orchestra ", str(sys.argv[1]))
-
 
 ############
 #Get samples
@@ -188,6 +187,17 @@ if not os.path.exists(out_dir):
   os.makedirs(out_dir)
 
 shutil.copyfile("./" + oodict['license'], out_dir + "/License") 
+
+#get trim algorithm choice
+if(len(sys.argv) > 2):
+  trimA = sys.argv[2]
+else:
+   trimA = "NRJ"
+
+if(len(sys.argv) > 3):
+  sensitivity = sys.argv[3]
+else:
+  sensitivity = 0.05
 
 for grp in instru_group : 
   if grp in oodict:
@@ -264,82 +274,95 @@ for grp in instru_group :
 #Blank remover
 ###############
 
-        #Create output dir for unblanked sample
+        #Create output dir for trimmed sample
         sfz_sample_dir = out_dir + "/" + grp + "/" + instru["name"] + "/"
         if not os.path.exists(sfz_sample_dir):
           os.makedirs(sfz_sample_dir)
 
 
-        #Prepare for copying
-        #idx = trim.getSimpleTrim(outfile)
-        idx = trim.getNRJTrim(outfile)
-        try:
-          with open(outfile, 'rb') as audio_file:
+        lgth = ""
+        if instru["sort"] == "lgth":
+          lgth = sort_lgth(outfile)
+          if not os.path.exists(sfz_sample_dir + lgth):
+            os.makedirs(sfz_sample_dir + lgth)
 
-            wh = audio_file.read(Wave_Header_Size())
-            whd = struct.unpack(wave_header_fmt, wh)
-            #print whd[0] 
-            fh = audio_file.read(Fmt_Header_Size())
-            fhd = struct.unpack(fmt_header_fmt, fh)
-
-            audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
-            #if data is not PCM => extended header
-            if fhd[2] != 1:
-              facth = audio_file.read(8)
-              facthd = struct.unpack("II", facth)
-              factdatah = audio_file.read(facthd[1])
-              print(facthd[1])
+        #more perc than midi note
+        if instru["sort"] == "perc_cut":
+          if i <= 60: lgth = "/1/"
+          if i > 60 and i <= 120: lgth = "/2/"
+          if i > 120: lgth = "/3/"
+          if not os.path.exists(sfz_sample_dir + lgth):
+            os.makedirs(sfz_sample_dir + lgth)
 
 
+        #trim with SOX
+        blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(os.path.basename(outfile))[0] + ".wav"
+        if trimA == "SOX":
+          try:
+            cmd = ["sox", outfile, blank_out_file, " silence ",  sensitivity, " 1%"]
+            #print("command :", str(cmd))
+            subprocess.call(cmd)
+          except OSError as e:
+            print("SOX programm for trimming audio files has encounter a problem : ")
+            print("ERRNO ", str(e.errno), " : ", e.strerror)
+            exit()
+        else:
+          if trimA == "Simple":
+            idx = trim.getSimpleTrim(outfile, sensitivity)
+          elif trimA == "NRJ":
+            idx = trim.getNRJTrim(outfile, sensitivity)
+          else:
+            idx = trim.getNRJTrim(outfile, sensitivity)
 
-            lgth = ""
-            #if oodict["key"] == "phil":
-            if instru["sort"] == "lgth":
-              lgth = sort_lgth(outfile)
-              if not os.path.exists(sfz_sample_dir + lgth):
-                os.makedirs(sfz_sample_dir + lgth)
+          try:
+            #Prepare for copying
+            with open(outfile, 'rb') as audio_file:
 
-            #more perc than midi note
-            if instru["sort"] == "perc_cut":
-              if i <= 60: lgth = "/1/"
-              if i > 60 and i <= 120: lgth = "/2/"
-              if i > 120: lgth = "/3/"
-              if not os.path.exists(sfz_sample_dir + lgth):
-                os.makedirs(sfz_sample_dir + lgth)
+              wh = audio_file.read(Wave_Header_Size())
+              whd = struct.unpack(wave_header_fmt, wh)
+              #print(whd[0])
+              fh = audio_file.read(Fmt_Header_Size())
+              fhd = struct.unpack(fmt_header_fmt, fh)
 
-
-            blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(os.path.basename(outfile))[0] + ".wav"
-            audio_file.seek(0)
-            with open(blank_out_file, 'wb') as bo_file: 
-            #WAVE HEADER 
-              #copy RIFF
-              bo_file.write(audio_file.read(4))
-              #change & write size - idx
-              bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
-              #copy WAVE
-              bo_file.write(audio_file.read(4))
-           #FMT header
-              #bo_file.write(audio_file.read(24))
-              bo_file.write(audio_file.read(8 + fhd[1]))
+              audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
               #if data is not PCM => extended header
               if fhd[2] != 1:
-                bo_file.write(audio_file.read(8 + facthd[1]))
+                facth = audio_file.read(8)
+                facthd = struct.unpack("II", facth)
+                factdatah = audio_file.read(facthd[1])
+                print(facthd[1])
+
+              #blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(os.path.basename(outfile))[0] + ".wav"
+              audio_file.seek(0)
+              with open(blank_out_file, 'wb') as bo_file:
+              #WAVE HEADER
+                #copy RIFF
+                bo_file.write(audio_file.read(4))
+                #change & write size - idx
+                bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
+                #copy WAVE
+                bo_file.write(audio_file.read(4))
+              #FMT header
+                #bo_file.write(audio_file.read(24))
+                bo_file.write(audio_file.read(8 + fhd[1]))
+                #if data is not PCM => extended header
+                if fhd[2] != 1:
+                  bo_file.write(audio_file.read(8 + facthd[1]))
           
-           #DATA 
-              bo_file.write(audio_file.read(4))
-              bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
-              audio_file.seek(idx, 1)
-              bo_file.write(audio_file.read())
+              #DATA 
+                bo_file.write(audio_file.read(4))
+                bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
+                audio_file.seek(idx, 1)
+                bo_file.write(audio_file.read())
 
 
-        except IOError :
-          print("Error opening file, next ", outfile)
-          continue
+          except IOError :
+            print("Error opening file, next ", outfile)
+            continue
 
 ##################
 #SFZ file writing
 ##################
-
       lgth_list = os.listdir(out_dir + "/" + grp + "/" + instru["name"] + "/")
       if os.path.isfile(out_dir + "/" + grp + "/" + instru["name"] + "/" + lgth_list[0]):
         lgth_list = "_"
@@ -399,4 +422,3 @@ for grp in instru_group :
                 sfz_file.write("hivel=" + str(smpl.hivel) + "\n")
                 
               sfz_file.write("\n")
-
