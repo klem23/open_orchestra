@@ -14,13 +14,19 @@ import shutil
 import trim
 import sfz
 
-#sort phil sample
+
+
+
+###########################
+#sort phil sample by length
+###########################
 def lgth_filter(filename):
   elem = filename.split("_")
   if re.match("[0-9]+", elem[2]):
     return True
   else:
     return False
+
 
 def sort_lgth(filename):
   path=""
@@ -35,7 +41,6 @@ def sort_lgth(filename):
   elif elem[2] == "15":
     path =  "/very-long"
 
-
   if "pizz" in elem[-1]:
     path += "_pizz"
 
@@ -47,25 +52,12 @@ def sort_lgth(filename):
   return path
 
 
-#wav file header format
-wave_header_fmt = "III"
-fmt_header_fmt = "IIHHIIHH"
-data_header_fmt = "II"
 
-def Wave_Header_Size():
-  return 12
-
-def Fmt_Header_Size():
-  return 24
-
-def Data_Header_Size():
-  return 8
-
-instru_group = ["brass", "wood", "string", "perc"]
 
 ##########
 #Main Code
 ##########
+instru_group = ["brass", "wood", "string", "perc"]
 
 if len(sys.argv) < 2:
   print("Give a json sample dictionary please")
@@ -106,9 +98,15 @@ if(len(sys.argv) > 3):
 else:
   sensitivity = 0.05
 
+
+
 for grp in instru_group : 
   if grp in oodict:
     for instru in oodict[grp] :
+
+############################
+#Downlad and extract archive
+############################
 
       #zip destination file
       dst_file = dwnld_dir + os.path.basename(instru["url"]).replace("%20", "_")
@@ -213,61 +211,15 @@ for grp in instru_group :
             print("SOX programm for trimming audio files has encounter a problem : ")
             print("ERRNO ", str(e.errno), " : ", e.strerror)
             exit()
+
+        elif trimA == "Simple":
+          trim.SimpleTrim(out_file, blank_out_file)
+        elif trimA == "NRJ":
+          trim.NRJTrim(outfile, blank_out_file)
         else:
-          if trimA == "Simple":
-            idx = trim.getSimpleTrim(outfile, sensitivity)
-          elif trimA == "NRJ":
-            idx = trim.getNRJTrim(outfile, sensitivity)
-          else:
-            idx = trim.getNRJTrim(outfile, sensitivity)
-
-          try:
-            #Prepare for copying
-            with open(outfile, 'rb') as audio_file:
-
-              wh = audio_file.read(Wave_Header_Size())
-              whd = struct.unpack(wave_header_fmt, wh)
-              #print(whd[0])
-              fh = audio_file.read(Fmt_Header_Size())
-              fhd = struct.unpack(fmt_header_fmt, fh)
-
-              audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
-              #if data is not PCM => extended header
-              if fhd[2] != 1:
-                facth = audio_file.read(8)
-                facthd = struct.unpack("II", facth)
-                factdatah = audio_file.read(facthd[1])
-                print(facthd[1])
-
-              #blank_out_file =  sfz_sample_dir + lgth + os.path.splitext(os.path.basename(outfile))[0] + ".wav"
-              audio_file.seek(0)
-              with open(blank_out_file, 'wb') as bo_file:
-              #WAVE HEADER
-                #copy RIFF
-                bo_file.write(audio_file.read(4))
-                #change & write size - idx
-                bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
-                #copy WAVE
-                bo_file.write(audio_file.read(4))
-              #FMT header
-                #bo_file.write(audio_file.read(24))
-                bo_file.write(audio_file.read(8 + fhd[1]))
-                #if data is not PCM => extended header
-                if fhd[2] != 1:
-                  bo_file.write(audio_file.read(8 + facthd[1]))
-          
-              #DATA 
-                bo_file.write(audio_file.read(4))
-                bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
-                audio_file.seek(idx, 1)
-                bo_file.write(audio_file.read())
-
-
-          except IOError :
-            print("Error opening file, next ", outfile)
-            continue
+          trim.NRJTrim(outfile, blank_out_file)
 
 ##################
 #SFZ file writing
 ##################
-      sfz.create_file(out_dir, grp, instru, oodict)
+    sfz.create_file(out_dir, grp, instru, oodict)

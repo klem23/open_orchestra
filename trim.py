@@ -3,6 +3,9 @@
 import struct
 import array
 
+
+
+
 def Blank_Width():
   return 20
 
@@ -39,7 +42,75 @@ def Data_Header_Size():
   return 8
 
 
+####################
+#File management
+####################
 
+def trim_n_copy(infile, outfile, idx):
+   try:
+   #Prepare for copying
+     with open(infile, 'rb') as audio_file:
+       wh = audio_file.read(Wave_Header_Size())
+       whd = struct.unpack(wave_header_fmt, wh)
+       #print(whd[0])
+       fh = audio_file.read(Fmt_Header_Size())
+       fhd = struct.unpack(fmt_header_fmt, fh)
+
+       audio_file.read(fhd[1] - Fmt_Header_Size() + 8)
+       #if data is not PCM => extended header
+       if fhd[2] != 1:
+         facth = audio_file.read(8)
+         facthd = struct.unpack("II", facth)
+         factdatah = audio_file.read(facthd[1])
+         print(facthd[1])
+
+       audio_file.seek(0)
+       with open(outfile, 'wb') as bo_file:
+       #WAVE HEADER
+         #copy RIFF
+         bo_file.write(audio_file.read(4))
+         #change & write size - idx
+         bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
+         #copy WAVE
+         bo_file.write(audio_file.read(4))
+       #FMT header
+         #bo_file.write(audio_file.read(24))
+         bo_file.write(audio_file.read(8 + fhd[1]))
+         #if data is not PCM => extended header
+         if fhd[2] != 1:
+           bo_file.write(audio_file.read(8 + facthd[1]))
+
+       #DATA
+         bo_file.write(audio_file.read(4))
+         bo_file.write(struct.pack("I", struct.unpack("I", audio_file.read(4))[0] - idx))
+         audio_file.seek(idx, 1)
+         bo_file.write(audio_file.read())
+
+
+   except IOError :
+     print("Error opening file, next ", outfile)
+
+
+
+def SimpleTrim(infile, outfile, sensitivity=0.05):
+  idx = getSimpleTrim(infile, sensitivity)
+  trim_n_copy(infile, outfile, idx)
+
+
+def NRJTrim(infile, outfile, sensitivity=0.05):
+  idx = getNRJTrim(infile, sensitivity)
+  trim_n_copy(infile, outfile, idx)
+
+
+
+
+
+
+
+#############################################
+#SILENCE DETECTION
+#############################################
+#SIMPLE AMP Threshold (noisegate)
 def getSimpleTrim(outfile, sensitivity=0.05):
 
   print("Blank remover ", outfile)
@@ -156,7 +227,11 @@ def getSimpleTrim(outfile, sensitivity=0.05):
     print("Error opening file, next ", outfile)
     return 0
 
- 
+
+
+
+
+#SILENCE catch by ENERGY Threshold
 def getNRJTrim(outfile, sensitivity=0.05):
   print("NRJ Blank remover ", outfile)
   try:
